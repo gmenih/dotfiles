@@ -28,6 +28,8 @@ brew install libpq
 brew install go
 brew install node
 brew install python
+brew install gradle
+brew install kubernetes-coreutils
 
 # Cask
 for app in \

@@ -1,10 +1,6 @@
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-10.0.1.jdk/Contents/Home
-export GRADLE_HOME=/usr/local/Cellar/gradle/4.7/libexec
-export PATH=$GRADLE_HOME/bin:$PATH
-export PATH="/usr/local/opt/libpq/bin:$PATH"
-export PATH="/usr/local/opt/libpq/bin:$PATH"
+export GRADLE_HOME=/usr/local/Cellar/gradle/4.9/libexec
 export CDPATH=.:~/Work/erento
-export PATH="$PATH":"$HOME/.pub-cache/bin":"$HOME/.bin"
 export ER="$HOME/Work/Erento"
 export GOPATH=$HOME/go
 export GOROOT=/usr/local/opt/go/libexec
@@ -12,6 +8,9 @@ path=(
   $path
   $GOPATH/bin
   $GOROOT/bin
+  ${HOME}/.bin
+  /usr/local/opt/libpq/bin
+  
 )
 export GROOVY_HOME=/usr/local/opt/groovy/libexec
 export GPG_TTY=$(tty)

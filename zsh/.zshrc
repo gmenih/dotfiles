@@ -40,3 +40,4 @@ HISTFILESIZE=25000
 source $ZSH/oh-my-zsh.sh
 source ~/.exports
 source ~/.functions
+source ~/.aliases
