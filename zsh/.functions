@@ -1,0 +1,140 @@
+########################################################
+#                      FUNCTIONS                       #
+#######################################################
+
+# Clone repository from github
+# $1 = Username OR full repo url
+# $2 = Repo name
+function gclone() {
+  if ! [ -x "$(command -v git)" ]; then
+    echo "Error: git is not installed!" >&2
+    return 1
+  fi
+
+  if [ "$#" -eq "1" ]
+  then
+    git clone "${1}"
+    return
+  fi
+  git clone "git@github.com:${1}/${2}.git"
+}
+
+# Kube Get Secret
+# $1 = Secret name
+# $2 = Secret key (optional)
+# $3/$2 = Namespace
+function kgs() {
+  if ! [ -x "$(command -v kubectl)" ]; then
+    echo "Error: kubectl is not installed!" >&2
+    return 1
+  fi
+
+  NAMESPACE=${3:-${2:-beta}}
+  COMMAND="kubectl -n ${NAMESPACE}"
+
+  if [ "$#" -eq "2" ]
+  then
+    OUTPUT="$(eval ${COMMAND} get secret $1 -o=jsonpath="{.data['$2']}" | base64 --decode)"
+  elif [ "$#" -eq "1" ]
+  then
+    OUTPUT="$(eval ${COMMAND} get secret $1 -o=json)"
+  fi
+  echo "${OUTPUT}"
+}
+
+# Kube Get Pods
+# $1 = Grep input to find pods by
+# $2 = Namespace
+function kgp() {
+  if ! [ -x "$(command -v kubectl)" ]; then
+    echo "Error: kubectl is not installed!" >&2
+    return 1
+  fi
+
+  NAMESPACE=${2:-beta}
+  COMMAND="kubectl -n ${NAMESPACE}"
+
+  if [ "$#" -ne "1" ]
+  then
+    echo "Usage: kgp <service-name>"
+    return 1
+  fi
+  
+  eval "${COMMAND} get po" | grep "${1}"
+}
+
+# Kube Get Logs
+# $1 = Service name
+function kgl() {
+  if ! [ -x "$(command -v kubectl)" ]; then
+    echo "Error: kubectl is not installed!" >&2
+    return 1
+  fi
+  NAMESPACE="${2:-beta}"
+  COMMAND="kubectl -n ${NAMESPACE}"
+  REGEX="^${1}-[0-9a-f]{32}"
+
+  echo "Fetching pods..."
+  OUTPUT=$(eval "${COMMAND} get po" | egrep "${REGEX}")
+  POD_NAME=$(echo ${OUTPUT} | awk '{print $1}')
+
+  echo "Found pod ${POD_NAME}"
+  if [ $(echo ${OUTPUT} | awk '{split($2,a,"/"); print a[1]}') -eq "2" ]; then
+    echo "Getting logs for pod ${POD_NAME}, container ${1}"
+    eval "${COMMAND} logs -f ${POD_NAME} ${1}"
+    return
+  fi
+  echo "Getting logs for pod ${POD_NAME}"
+  eval "${COMMAND} logs -f ${POD_NAME}"
+}
+
+# Kube Make Secret
+# $1 OR pipe = Secret content
+function kmsec() {
+  local INPUT=""
+  if [ "$#" -eq 0 ]; then
+    while read -r line; do INPUT="${INPUT}\n${line}"; done
+  else
+    INPUT=${1}
+  fi
+
+  echo -n "${INPUT}" | base64
+}
+
+# Kube Read Secret
+# $1 OR pipe = Secret content
+function krsec() {
+  local INPUT=""
+    if [ "$#" -eq 0 ]; then
+      while read -r line; do INPUT="${INPUT}\n${line}"; done
+    else
+      INPUT=${1}
+    fi
+  echo "${INPUT}" | base64 --decode
+}
+
+# Generate a random string
+# $1 = Length (default=8)
+function randstr() {
+  LC_ALL=C tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_`{|}~' </dev/urandom | head -c ${1:-8} ; echo
+}
+
+
+# Open SQL Proxy to Google Cloud
+# $1 = Database name 
+# $2 = Local port (default=5432)
+# $3 = Namespace (default=beta-2)
+# $4 = Region (default=europe-west1)
+function gsql() {
+  if ! [ -x "$(command -v cloud_sql_proxy)" ]; then
+    echo 'Error: cloud_sql_proxy is not installed.' >&2
+    return 1
+  fi
+
+  local PORT=${2:-5432}
+  local NAMESPACE=${3:-beta-2}
+  local REGION=${4:-europe-west1}
+
+  echo "Opening proxy to ${1} on port ${PORT}\nThis might take a while..."
+  cloud_sql_proxy -instances="erento-beta:${REGION}:tf-${1}-${NAMESPACE}=tcp:${PORT}"
+}
