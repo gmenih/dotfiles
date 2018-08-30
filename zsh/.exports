@@ -1,9 +1,14 @@
+# Browser Bin locations for Karma
+export CHROME_BIN="/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary"
+export FIREFOX_BIN="/Applications/Firefox.app/Contents/MacOS/firefox"
+
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-10.0.1.jdk/Contents/Home
 export GRADLE_HOME=/usr/local/Cellar/gradle/4.9/libexec
 export CDPATH=.:~/Work/erento
-export ER="$HOME/Work/Erento"
 export GOPATH=$HOME/go
 export GOROOT=/usr/local/opt/go/libexec
+export ERGO="$GOPATH/src/github.com/erento"
+export ER="$HOME/Work/Erento"
 path=(
   $path
   $GOPATH/bin

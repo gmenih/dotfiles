@@ -21,7 +21,15 @@ brew install vim --with-override-system=vi
 # Dev
 brew install git
 brew install git-crypt
+brew install docker docker-compose
 
+# CLI
+brew install bat
+brew install prettyping
+brew install htop
+brew install tldr
+
+# OTHER
 brew install libpq
 
 # Languages
@@ -34,22 +42,23 @@ brew install kubernetes-coreutils
 # Cask
 for app in \
     '1password' \
-    'alfred' \
-    'flux' \
-    'google-cloud-sdk' \
-    'google-chrome' \
-    'insomnia' \
-    'spotify' \
-    'vlc' \
     'aerial' \
+    'alfred' \
+    'docker' \
     'firefox' \
+    'flux' \
     'font-fira-code' \
+    'google-chrome' \
+    'google-cloud-sdk' \
+    'insomnia' \
     'iterm2' \
-    'slack' \
-    'tunnelblick' \
-    'visual-studio-code' \
     'java' \
     'jetbrains-toolbox' \
+    'slack' \
+    'spotify' \
+    'tunnelblick' \
+    'visual-studio-code' \
+    'vlc' \
     ;do
         brew cask install ${app}
 done

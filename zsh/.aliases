@@ -1,20 +1,24 @@
+source ~/.private_vars
+
 alias ll='ls -l'
-alias ktl='kubectl'
+alias ktl='kubectl --context="${DEV_KUBERNETES_CONTEXT}" -n="${DEV_KUBERNETES_NAMESPACE}"'
+alias ktlprod='kubectl --context="${PROD_KUBERNETES_CONTEXT}" -n="${PROD_KUBERNETES_NAMESPACE}"'
 alias dockill='docker kill "$(docker container ls -q)"'
 alias gstatus='git status'
+alias bs='brew search'
+alias bi='brew install'
+alias bci='brew cask install'
+alias zsr='source ${HOME}/.zshrc'
+alias cat='bat'
+alias ping='prettyping --nolegend'
 
-# Stuff I never really use but cannot delete either because of http://xkcd.com/530/
 alias stfu="osascript -e 'set volume output muted true'"
 alias pumpitup="osascript -e 'set volume output volume 100'"
 
-# Lock the screen (when going AFK)
 alias afk="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
 
-# List all files colorized in long format
 alias l="ls -lF ${colorflag}"
 
-# List all files colorized in long format, including dot files
 alias la="ls -laF ${colorflag}"
 
-# List only directories
 alias lsd="ls -lF ${colorflag} | grep --color=never '^d'"

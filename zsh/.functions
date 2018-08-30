@@ -34,7 +34,7 @@ function kgs() {
 
   if [ "$#" -eq "2" ]
   then
-    OUTPUT="$(eval ${COMMAND} get secret $1 -o=jsonpath="{.data['$2']}" | base64 --decode)"
+    OUTPUT="$(eval ${COMMAND} get secret $1 -o=jsonpath="{.data.\"$2\"}" | base64 --decode)"
   elif [ "$#" -eq "1" ]
   then
     OUTPUT="$(eval ${COMMAND} get secret $1 -o=json)"
@@ -63,6 +63,20 @@ function kgp() {
   eval "${COMMAND} get po" | grep "${1}"
 }
 
+# Read by lines and try to format JSON
+function pipeJson() {
+    while read LINE; do
+      if [[ $LINE =~ \/health ]]; then
+        continue
+      fi
+      if [[ $LINE =~ ^\{.* ]]; then
+        echo $LINE | jq -C
+      else
+        echo $LINE
+      fi
+    done
+  }
+
 # Kube Get Logs
 # $1 = Service name
 function kgl() {
@@ -70,9 +84,10 @@ function kgl() {
     echo "Error: kubectl is not installed!" >&2
     return 1
   fi
+
   NAMESPACE="${2:-beta}"
   COMMAND="kubectl -n ${NAMESPACE}"
-  REGEX="^${1}-[0-9a-f]{32}"
+  REGEX="^${1}-([0-9a-f]{32}|[0-9a-z]{5})\s"
 
   echo "Fetching pods..."
   OUTPUT=$(eval "${COMMAND} get po" | egrep "${REGEX}")
