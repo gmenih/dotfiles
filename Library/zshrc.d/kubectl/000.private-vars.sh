@@ -1,0 +1,4 @@
+export DEV_KUBERNETES_CONTEXT=gke_erento-beta_europe-west1_beta
+export DEV_KUBERNETES_NAMESPACE=beta
+export PROD_KUBERNETES_CONTEXT=gke_erento-production_europe-west1-b_production
+export PROD_KUBERNETES_NAMESPACE=production

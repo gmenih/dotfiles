@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-git pull origin master
-
 # Install brew
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
@@ -14,8 +12,8 @@ curl -o cloud_sql_proxy https://dl.google.com/cloudsql/cloud_sql_proxy.darwin.am
 chmod +x cloud_sql_proxy
 
 # Sync zsh
-rsync 
-    -avh --no-perms ./zsh ~;
+rsync -avh --no-perms --exclude "bootstrap.sh" --exclude "brew.sh" --exclude "macos.sh". ~;
+
 source ~/.zshrc
 
 # Install everything from brew
