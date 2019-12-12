@@ -7,7 +7,12 @@ function gsql() {
     local PORT=${2:-5432}
     local NAMESPACE=${3:-beta-2}
     local REGION=${4:-europe-west1}
+    local NAMESPACE=${5:-$GSQL_PROD_NAMESPACE}
 
     echo "Opening proxy to ${1} on port ${PORT}\nThis might take a while..."
-    cloud_sql_proxy -instances="erento-beta:${REGION}:tf-${1}-${NAMESPACE}=tcp:${PORT}"
+    cloud_sql_proxy -instances="${NAMESPACE}:${REGION}:tf-${1}-${NAMESPACE}=tcp:${PORT}"
+}
+
+function gsqlprod () {
+    gsql $1 $2 $3 $5 $GSQL_PROD_NAMESPACE
 }
