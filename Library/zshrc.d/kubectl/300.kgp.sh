@@ -1,14 +1,11 @@
 # Kube Get Pods
-# $1 = Grep input to find pods by
-# $2 = Namespace
 function kgp() {
-    NAMESPACE=${2:-beta}
-    COMMAND="kubectl -n ${NAMESPACE}"
+    CMD=$([[ $_ = "--prod" ]] && echo "ktlprod" || echo "ktl") 
 
-    if [ "$#" -ne "1" ]; then
-        echo "Usage: kgp <service-name>"
-        return 1
-    fi
+    PATTERN=${1}
+    REST=${@:2} 
+    OUTPUT=$($CMD get po ${REST/--prod/})
 
-    eval "${COMMAND} get po" | grep "${1}"
+    echo $OUTPUT | head -n 1
+    echo $OUTPUT | grep $1
 }
