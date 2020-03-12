@@ -12,7 +12,3 @@ function gsql() {
     echo "Opening proxy to ${1} on port ${PORT}\nThis might take a while..."
     cloud_sql_proxy -instances="${NAMESPACE}:${REGION}:tf-${1}-${NAMESPACE}=tcp:${PORT}"
 }
-
-function gsqlprod () {
-    gsql $1 $2 $3 $5 $GSQL_PROD_NAMESPACE
-}

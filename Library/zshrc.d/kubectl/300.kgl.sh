@@ -1,20 +1,22 @@
+function ktllog () {
+    local LOG_REQ=${2:-10}
+    echo "logs --selector app=$1 --container=$1 -f --max-log-requests=$LOG_REQ"
+}
+
+function ktllegacy () {
+    local LOG_REQ=${2:-10}
+    echo "logs --selector role=$1 --container=$1 -f --max-log-requests=$LOG_REQ"
+}
+
 # Kube Get Logs
 # $1 = Service name
 function kgl() {
-    NAMESPACE="${2:-beta}"
-    COMMAND="kubectl -n ${NAMESPACE}"
-    REGEX="^${1}-([0-9a-f]{32}|[0-9a-z]{5})\s"
+    CMD=$([[ $_ = "--prod" ]] && echo "ktlprod" || echo "ktl")
+    $CMD $(ktllog $1) 
+}
 
-    echo "Fetching pods..."
-    OUTPUT=$(eval "${COMMAND} get po" | egrep "${REGEX}")
-    POD_NAME=$(echo ${OUTPUT} | awk '{print $1}')
-
-    echo "Found pod ${POD_NAME}"
-    if [ $(echo ${OUTPUT} | awk '{split($2,a,"/"); print a[1]}') -eq "2" ]; then
-        echo "Getting logs for pod ${POD_NAME}, container ${1}"
-        eval "${COMMAND} logs -f ${POD_NAME} ${1}"
-        return
-    fi
-    echo "Getting logs for pod ${POD_NAME}"
-    eval "${COMMAND} logs -f ${POD_NAME}"
+# Kube Get Logs (Legacy)
+function kgll() {
+    CMD=$([[ $_ = "--prod" ]] && echo "ktlprod" || echo "ktl")
+    $CMD $(ktllegacy $1)
 }
