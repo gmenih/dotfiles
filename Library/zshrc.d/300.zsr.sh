@@ -1,0 +1,3 @@
+function zsr() {
+    source ~/.zshrc
+}
