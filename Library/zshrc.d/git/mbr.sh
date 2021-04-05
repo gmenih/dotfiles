@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 # Make Branch
 function mbr() {

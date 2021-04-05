@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 alias sstart="sudo systemctl start"
 alias sstop="sudo systemctl stop"

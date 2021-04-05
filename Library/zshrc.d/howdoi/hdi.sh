@@ -1,3 +1,3 @@
-#!/bin/bash
+#!/bin/zsh
 
 function hdi(){ howdoi "$*" -c; }

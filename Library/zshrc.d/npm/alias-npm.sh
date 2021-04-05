@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 alias ffs='rm -rf ./node_modules ./package-lock.json && npm install'
 alias ni='npm install'

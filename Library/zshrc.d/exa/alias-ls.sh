@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 # Changing "ls" to "exa"
 alias ls='exa -al --color=always --group-directories-first'
