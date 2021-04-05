@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 # Read by lines and try to format JSON
 function pipejson() {

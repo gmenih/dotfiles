@@ -1,3 +1,3 @@
-#!/bin/bash
+#!/bin/zsh
 
 export HISTFILESIZE=250000

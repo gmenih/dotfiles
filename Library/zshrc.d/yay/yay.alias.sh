@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 alias ys="yay"
 alias yi="yay -S"

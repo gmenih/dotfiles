@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 # Zsh Source Reload
 function zsr() {

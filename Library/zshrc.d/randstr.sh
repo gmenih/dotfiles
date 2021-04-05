@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 # Generate a random string
 # $1 = Length (default=8)
