@@ -1,1 +1,0 @@
-function hdi(){ howdoi $* -c }

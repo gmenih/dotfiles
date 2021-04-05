@@ -1,1 +1,0 @@
-alias gll='git pull'
