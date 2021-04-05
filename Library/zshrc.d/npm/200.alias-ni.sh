@@ -1,1 +1,0 @@
-alias ni='npm install'

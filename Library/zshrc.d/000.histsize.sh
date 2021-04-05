@@ -1,1 +1,0 @@
-export HISTFILESIZE=250000
