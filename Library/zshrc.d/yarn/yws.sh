@@ -1,0 +1,6 @@
+alias yws="yarn workspace"
+alias ye="yarn"
+alias ys="yarn start"
+alias yt="yarn test"
+alias yt2="yarn test:e2e"
+alias ytw="yarn test:watch"
