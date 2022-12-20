@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-ZSH_THEME="muse"
+ZSH_THEME="amuse"
 
 plugins=(
     git
