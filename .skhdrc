@@ -1,0 +1,52 @@
+rshift - escape: yabai -m window --toggle float
+
+rshift - tab: yabai -m space --focus next || yabai -m space --focus first
+
+rshift - 1: yabai -m space --focus 1
+rshift - 2: yabai -m space --focus 2
+rshift - 3: yabai -m space --focus 3
+rshift - 4: yabai -m space --focus 4
+rshift - 5: yabai -m space --focus 5
+rshift - 6: yabai -m space --focus 6
+rshift - 7: yabai -m space --focus 7
+rshift - 8: yabai -m space --focus 8
+rshift - 9: yabai -m space --focus 9
+rshift - 0: yabai -m space --focus 10
+
+cmd + rshift - 1: yabai -m window --space 1
+cmd + rshift - 2: yabai -m window --space 2
+cmd + rshift - 3: yabai -m window --space 3
+cmd + rshift - 4: yabai -m window --space 4
+cmd + rshift - 5: yabai -m window --space 5
+cmd + rshift - 6: yabai -m window --space 6
+cmd + rshift - 7: yabai -m window --space 7
+cmd + rshift - 8: yabai -m window --space 8
+cmd + rshift - 9: yabai -m window --space 9
+cmd + rshift - 0: yabai -m window --space 10
+
+# Window Rotation
+cmd + rshift - h : yabai -m window --swap west
+cmd + rshift - j : yabai -m window --swap south
+cmd + rshift - k : yabai -m window --swap north
+cmd + rshift - l : yabai -m window --swap east
+
+# Window Focus
+rshift - h : yabai -m window --focus west
+rshift - j : yabai -m window --focus south
+rshift - k : yabai -m window --focus north
+rshift - l : yabai -m window --focus east
+
+# Window Resize
+rshift + alt - h : yabai -m window --resize left:10:0
+rshift + alt - j : yabai -m window --resize down:0:10
+rshift + alt - k : yabai -m window --resize up:0:10
+rshift + alt - l : yabai -m window --resize right:10:0
+
+# Audio
+rshift - a: SwitchAudioSource -s 'Acer X34 P'
+rshift - m: SwitchAudioSource -s 'MacBook Pro Speakers'
+rshift - h: SwitchAudioSource -s 'MOMENTUM 3'
+rshift - g: SwitchAudioSource -s "Er Pods"
+
+cmd + rshift - f: yabai -m config focus_follows_mouse autofocus
+rshift - f: yabai -m config focus_follows_mouse off
