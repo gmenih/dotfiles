@@ -1,0 +1,30 @@
+#! /bin/bash
+
+# Install Pacman    
+if ! command -v yay &> /dev/null; then
+    sudo pacman -S --needed git base-devel
+    git clone https://aur.archlinux.org/yay.git /tmp/yay
+    cd /tmp/yay
+    makepkg -si
+fi
+
+
+{{ $packages := list
+     "base-devel"
+     "openvpn" 
+     "openssh"
+     "google-chrome"
+     "lsof"
+     "git"
+     "go"
+     "zsh"
+     "docker"
+     "docker-compose"
+     "neovim" -}}
+     
+
+# Install packages
+yay -S {{ range $packages }} {{ . }}{{ end }} --noconfirm
+
+# Use ZSH
+chsh -s "$(which zsh)" {{ .chezmoi.username | quote }}

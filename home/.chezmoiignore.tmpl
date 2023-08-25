@@ -1,0 +1,14 @@
+{{ if ne .chezmoi.os "darwin" }}
+.yabairc
+.skhdrc
+{{ end }}
+
+.oh-my-zsh/cache/**
+
+{{ if not .isArch }}
+.chezmoi-scripts/arch/**
+{{ end }}
+
+{{ if ne .chezmoi.os "darwin" }}
+.chezmoi-scripts/darwin/**
+{{ end }}

@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Generate Github key
+ssh-keygen -t rsa -b 4096 -C "gregor@menih.si" -f ~/.ssh/github -N ''
+echo "SSH key generated"
+echo "Add this to GitHub:"
+cat ~/.ssh/github.pub
+echo
+
+{{ if ne .chezmoi.hostname "monkey" }}
+# Generate Monkey key
+ssh-keygen -t rsa -b 4096 -C "gregor@menih.si" -f ~/.ssh/monkey -N ''
+echo "SSH key generated"
+echo
+{{ end }}

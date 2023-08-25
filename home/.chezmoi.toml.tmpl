@@ -1,0 +1,9 @@
+{{ $isarch := promptBoolOnce . "hasGUI" "Does this machine have a GUI" }}
+
+[data]
+    version_node = "16.20.0"
+    version_python = "3.11.0"
+
+    hostname = {{ .chezmoi.hostname | quote }}
+    homeDir = {{ .chezmoi.homeDir | quote }}
+    isArch = {{ $isarch }}
