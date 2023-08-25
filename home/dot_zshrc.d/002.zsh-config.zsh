@@ -1,10 +1,16 @@
 #!/bin/zsh
 
-ZSH_THEME="amuse"
+ZSH_THEME="gamuze"
 
 plugins=(
     git
     docker
+    ag
+    asdf
+    1password
+    aws
+    fd
+    npm
 )
 
 source "$ZSH/oh-my-zsh.sh"

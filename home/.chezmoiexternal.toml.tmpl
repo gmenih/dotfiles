@@ -1,0 +1,42 @@
+[".oh-my-zsh"]
+    type = "archive"
+    url = "https://github.com/ohmyzsh/ohmyzsh/archive/master.tar.gz"
+    exact = true
+    stripComponents = 1
+    refreshPeriod = "168h"
+    
+[".oh-my-zsh/custom/plugins/zsh-syntax-highlighting"]
+    type = "archive"
+    url = "https://github.com/zsh-users/zsh-syntax-highlighting/archive/master.tar.gz"
+    exact = true
+    stripComponents = 1
+    refreshPeriod = "168h"
+
+[".asdf"]
+    type = "git-repo"
+    url = "https://github.com/asdf-vm/asdf.git"
+    branch = "master"
+    exact = true
+    pull.args = ["--depth", "1"]
+
+[".asdf/plugins/nodejs"]
+    type = "git-repo"
+    exact = true
+    url = "https://github.com/asdf-vm/asdf-nodejs.git"
+    branch = "master"
+    pull.args = ["--depth", "1"]
+
+[".asdf/plugins/python"]
+    type = "git-repo"
+    exact = true
+    url = "https://github.com/asdf-community/asdf-python.git"
+    branch = "master"
+    pull.args = ["--depth", "1"]
+
+
+[".asdf/plugins/terraform"]
+    type = "git-repo"
+    exact = true
+    url = "https://github.com/asdf-community/asdf-hashicorp.git"
+    branch = "master"
+    pull.args = ["--depth", "1"]

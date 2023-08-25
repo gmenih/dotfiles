@@ -1,0 +1,15 @@
+Host monkey
+	User code
+	IdentityFile ~/.ssh/monkey
+	HostName monkey.werewolf-gorgon.ts.net
+
+Host pi
+	User admin
+	IdentityFile ~/.ssh/monkey
+	HostName pipipi.werewolf=gorgon.ts.net
+
+Host github.com
+	User git
+	IdentityFile ~/.ssh/github
+	HostName github.com
+
