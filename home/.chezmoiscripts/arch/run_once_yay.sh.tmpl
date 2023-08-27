@@ -17,6 +17,8 @@ fi
      "lsof"
      "git"
      "go"
+     "exa"
+     "the_silver_searcher"
      "zsh"
      "docker"
      "docker-compose"
@@ -25,6 +27,3 @@ fi
 
 # Install packages
 yay -S {{ range $packages }} {{ . }}{{ end }} --noconfirm
-
-# Use ZSH
-chsh -s "$(which zsh)" {{ .chezmoi.username | quote }}

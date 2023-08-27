@@ -1,4 +1,5 @@
-{{ $isarch := promptBoolOnce . "hasGUI" "Does this machine have a GUI" }}
+{{ $isMac := eq .chezmoi.os "darwin" }}
+{{ $isArch := and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "arch") }}
 
 [data]
     version_node = "16.20.0"
@@ -6,4 +7,5 @@
 
     hostname = {{ .chezmoi.hostname | quote }}
     homeDir = {{ .chezmoi.homeDir | quote }}
-    isArch = {{ $isarch }}
+    isArch = {{ $isArch }}
+    isMac = {{ $isMac }}
