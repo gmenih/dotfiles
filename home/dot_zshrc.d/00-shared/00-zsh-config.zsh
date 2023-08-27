@@ -1,5 +1,10 @@
 #!/bin/zsh
 
+export ZSH="${HOME}/.oh-my-zsh"
+export HISTFILESIZE=250000
+
+source "$ZSH/oh-my-zsh.sh"
+
 ZSH_THEME="gamuze"
 
 plugins=(
@@ -12,8 +17,6 @@ plugins=(
     fd
     npm
 )
-
-source "$ZSH/oh-my-zsh.sh"
 
 update() {
     local brew="brew update; brew upgrade;"

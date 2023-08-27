@@ -1,1 +1,0 @@
-#!/bin/bashsource <(antibody init)packages=(    zsh-users/zsh-autosuggestions    zsh-users/zsh-completions    zdharma/fast-syntax-highlighting)for package in "${packages[@]}"; do     antibody bundle "$package"done
