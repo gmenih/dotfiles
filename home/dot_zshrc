@@ -2,18 +2,6 @@
 
 CONF_PATH="${HOME}/.zshrc.d"
 
-
-{{- $path := joinPath .chezmoi.homeDir ".zshrc.d" }}
-{{- $files := glob (joinPath $path "/**/*.*") }}
-
-{{- range $i, $file := $files }}
-    {{- range $j, $filej := $files }}
-        {{- if and (lt $i $j) (gt (base $file) (base $filej)) }}
-            {{- $files = slice $files 0 $i | append $filej | append (slice $files ($add $i 1)) | append $file | append (slice $files ($add $j 1)) }}
-        {{- end }}
-    {{- end }}
-{{- end }}
-
 function source_dir() {
     for FN in $1/*; do
         # if file, directly source it
