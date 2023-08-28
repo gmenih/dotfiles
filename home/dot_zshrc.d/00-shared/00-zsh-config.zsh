@@ -1,11 +1,7 @@
 #!/bin/zsh
 
-export ZSH="${HOME}/.oh-my-zsh"
-export HISTFILESIZE=250000
-
-source "$ZSH/oh-my-zsh.sh"
-
-ZSH_THEME="amuse"
+# Settings
+ZSH_THEME="gamuze"
 
 plugins=(
     git
@@ -17,3 +13,9 @@ plugins=(
     fd
     npm
 )
+
+export ZSH="${HOME}/.oh-my-zsh"
+export HISTFILESIZE=250000
+
+# Must be last!
+source "$ZSH/oh-my-zsh.sh"
