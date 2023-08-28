@@ -1,0 +1,7 @@
+#!/bin/zsh
+
+# DO NOT EDIT
+{{ $files := glob (joinPath .homeDir ".zshrc.d" "**/*.*") -}}
+{{ range $files -}}
+source {{ . | quote }}
+{{ end -}}
