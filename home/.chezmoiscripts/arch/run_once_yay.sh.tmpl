@@ -1,15 +1,16 @@
 #! /bin/bash
 
 # Install Pacman    
-if ! command -v yay &> /dev/null; then
-    sudo pacman -S --needed git base-devel
-    git clone https://aur.archlinux.org/yay.git /tmp/yay
-    cd /tmp/yay
-    makepkg -si
-fi
+{{- if not (lookPath "yay") -}}
+sudo pacman -S --needed git base-devel
+git clone https://aur.archlinux.org/yay.git /tmp/yay
+cd /tmp/yay
+makepkg -si
+{{- end -}}
 
 
 {{ $packages := list
+     "1password-cli"
      "base-devel"
      "openvpn" 
      "openssh"
