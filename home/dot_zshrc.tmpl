@@ -1,7 +1,17 @@
 #!/bin/zsh
 
 # DO NOT EDIT
-{{ $files := glob (joinPath .homeDir ".zshrc.d" "**/*.*") -}}
+{{ $homeDir := .homeDir -}}
+{{ $relPath := joinPath .homeDir ".zshrc.d" -}}
+{{ $files := glob (joinPath $relPath "**/*.*") -}}
 {{ range $files -}}
+{{   $pathList := splitList "/" (. | replace $relPath "") -}}
+{{   if gt (len $pathList) 3 -}}
+{{     $lastDir := index $pathList (sub (len $pathList) 2) -}}
+{{     if (lookPath $lastDir) -}}
 source {{ . | quote }}
+{{     end -}}
+{{   else -}}
+source {{ . | quote }}
+{{   end -}}
 {{ end -}}
