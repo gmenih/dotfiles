@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+brew update
+
+brew upgrade
+
+{{ $brews := list 
+    "coreutils"
+    "findutils"
+    "grep"
+    "gnu-tar"
+    "gnupg"
+    "openssh"
+    "screen"
+    "neovim"
+    "bat"
+    "prettyping"
+    "btop"
+    "tldr"
+    "docker"
+    "docker-compose"
+    "go"
+}}
+
+{{ $casks := list 
+    "1password" 
+    "firefox" 
+    "flux" 
+    "font-fira-code" 
+    "google-chrome" 
+    "iterm2" 
+    "slack" 
+    "spotify" 
+    "tunnelblick" 
+    "visual-studio-code" 
+    "vlc" 
+}}
+    
+brew bundle --no-lock --file=/dev/stdin <<EOF
+{{ range ($brews | sortAlpha | uniq) -}}
+brew "{{ . }}"
+{{ end -}}
+
+{{ range ($casks | sortAlpha | uniq) -}}
+cask "{{ . }}"
+{{ end -}}
+EOF
+
+brew cleanup

@@ -5,7 +5,7 @@ export HISTFILESIZE=250000
 
 source "$ZSH/oh-my-zsh.sh"
 
-ZSH_THEME="gamuze"
+ZSH_THEME="amuse"
 
 plugins=(
     git
