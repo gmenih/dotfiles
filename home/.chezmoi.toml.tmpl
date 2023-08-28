@@ -1,6 +1,8 @@
 {{ $isMac := eq .chezmoi.os "darwin" }}
 {{ $isArch := and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "arch") }}
 
+{{ $npmToken := onepasswordRead "op://Personal/npm_token/token" }} 
+
 [data]
     version_node = "16.20.0"
     version_python = "3.11.0"
@@ -10,3 +12,5 @@
     homeDir = {{ .chezmoi.homeDir | quote }}
     isArch = {{ $isArch }}
     isMac = {{ $isMac }}
+
+    npmToken = {{ $npmToken | quote }}
