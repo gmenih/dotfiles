@@ -15,6 +15,7 @@ plugins=(
 )
 
 export ZSH="${HOME}/.oh-my-zsh"
+export ZSR="$HOME/.zshrc.d"
 export HISTFILESIZE=250000
 
 # Must be last!

@@ -1,12 +1,16 @@
 Host monkey
 	User code
 	IdentityFile ~/.ssh/monkey
-	HostName monkey.werewolf-gorgon.ts.net
+	HostName monkey.{{ .tsDns }}
 
 Host pi
 	User admin
 	IdentityFile ~/.ssh/monkey
-	HostName pipipi.werewolf=gorgon.ts.net
+	HostName pipipi.{{ .tsDns }}
+    
+Host 0x
+	User gmenih
+	HostName 0x676d.{{ .tsDns }}
 
 Host github.com
 	User git
