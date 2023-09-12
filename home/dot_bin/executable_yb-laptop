@@ -1,0 +1,19 @@
+#!/bin/zsh
+
+move_app_to_space() {
+    local space_num="$1"
+    local app_name="$2"
+
+    local windows="$(yabai -m query --windows | jq -r ".[] | select(.app == \"$app_name\") | .id")"
+
+    # Move each window to the desired space
+    yabai -m query --windows | jq -r ".[] | select(.app == \"$app_name\") | .id" | while IFS= read -r win; do
+        yabai -m window "$win" --space "$space_num"
+    done
+
+}
+
+move_app_to_space 1 "Arc"
+move_app_to_space 2 "Cursor"
+move_app_to_space 3 "Discord"
+move_app_to_space 4 "Slack"
