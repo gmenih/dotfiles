@@ -1,2 +1,2 @@
-export PATH="$PATH:$HOME/.bin:$HOME/.npm-global:$HOME/go/bin"
+export PATH="$PATH:$HOME/.bin:$HOME/.npm-global/bin:$HOME/go/bin"
 
