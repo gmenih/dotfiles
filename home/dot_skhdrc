@@ -49,8 +49,8 @@ rshift - e: SwitchAudioSource -s 'MOMENTUM 3'
 rshift - r: SwitchAudioSource -s "Er Pods"
 
 # Mouse focus
-cmd + rshift - f: yabai -m config focus_follows_mouse autofocus
-rshift - f: yabai -m config focus_follows_mouse off
+cmd + rshift - f: yabai -m config focus_follows_mouse off
+rshift - f: yabai -m config focus_follows_mouse autofocus
 
 # Layouts
 rshift - g: yb-laptop
