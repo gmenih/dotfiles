@@ -14,7 +14,9 @@ move_app_to_space() {
 }
 
 move_app_to_space 1 "Arc"
+move_app_to_space 1 "Google Chrome"
 move_app_to_space 2 "Cursor"
+move_app_to_space 2 "Code"
 move_app_to_space 3 "Discord"
 move_app_to_space 4 "Slack"
 move_app_to_space 5 "iTerm2"

@@ -4,6 +4,9 @@ brew update
 
 brew upgrade
 
+brew tap koekeishiya/formulae
+brew tap homebrew/cask-fonts
+
 {{ $brews := list 
     "coreutils"
     "findutils"
@@ -20,22 +23,29 @@ brew upgrade
     "docker"
     "docker-compose"
     "go"
-    "yabai"
-    "skhd"
+    "yq"
+    "jq"
+    "koekeishiya/formulae/yabai"
+    "koekeishiya/formulae/skhd"
 }}
 
 {{ $casks := list 
-    "1password" 
-    "firefox" 
-    "flux" 
-    "font-fira-code" 
-    "google-chrome" 
-    "iterm2" 
-    "slack" 
-    "spotify" 
-    "tunnelblick" 
-    "visual-studio-code" 
-    "vlc" 
+    "1password"
+    "firefox"
+    "flux"
+    "font-fira-code"
+    "google-chrome"
+    "arc"
+    "iterm2"
+    "slack"
+    "spotify"
+    "tunnelblick"
+    "visual-studio-code"
+    "cursor"
+    "vlc"
+    "tailscale"
+    "raycast"
+    "obsidian"
 }}
     
 brew bundle --no-lock --file=/dev/stdin <<EOF
