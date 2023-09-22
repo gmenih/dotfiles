@@ -146,6 +146,16 @@ defaults write com.apple.ActivityMonitor SortColumn -string "CPUUsage"
 defaults write com.apple.ActivityMonitor SortDirection -int 0
 
 # Enable tabbing through options in prompts
-defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
+defaults write jNSGlobalDomain AppleKeyboardUIMode -int 3
+
+# Disable spotlight completely
+launchctl load -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist
+
+# Change character repeat
+defaults write -g InitialKeyRepeat -int 15
+defaults write -g KeyRepeat -int 3
+
+# Allow repeating accented characters
+defaults write -g ApplePressAndHoldEnabled -bool false
 
 echo "Done. Note that some of these changes require a logout/restart to take effect."
