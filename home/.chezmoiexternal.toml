@@ -70,3 +70,10 @@
     url = "https://github.com/cometkim/asdf-bun.git"
     branch = "main"
     pull.args = ["--depth", "1"]
+
+[".tmux/plugins/tpm"]
+    type = "git-repo"
+    url = "https://github.com/tmux-plugins/tpm.git"
+    exact = true
+    branch = "master"
+    pull.args = ["--depth", "1"]
