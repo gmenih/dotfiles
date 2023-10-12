@@ -18,6 +18,6 @@ source {{ . | quote }}
 
 {{ if .isArch -}}
 if [ -z "$TMUX" ]; then
-	tmux attach -t main || tmux new -s main
+	tmux new -A -s main
 fi
 {{ end -}}
