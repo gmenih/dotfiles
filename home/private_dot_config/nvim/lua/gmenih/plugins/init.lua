@@ -1,5 +1,6 @@
+-- Add common plugins
 return {
-  "nvim-lua/plenary.nvim", -- lua functions that many plugins use
+    "nvim-lua/plenary.nvim", -- lua functions that many plugins use
 
-  "christoomey/vim-tmux-navigator", -- tmux & split window navigation
+    "christoomey/vim-tmux-navigator", -- tmux & split window navigation
 }
