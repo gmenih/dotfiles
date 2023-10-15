@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function vpa {
-	cd "$HOME/Work/povio/arena/client-config"
+	cd "$HOME/.vpn"
 	sudo openvpn --config "$1.ovpn" --daemon
     cd -
 }

@@ -1,4 +1,5 @@
+-- Better UI prompts
 return {
-  "stevearc/dressing.nvim",
-  event = "VeryLazy",
+    "stevearc/dressing.nvim",
+    event = "VeryLazy",
 }
