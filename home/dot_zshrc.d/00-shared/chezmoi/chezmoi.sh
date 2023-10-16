@@ -2,7 +2,8 @@
 
 alias cm="chezmoi"
 alias cmu="chezmoi update"
-alias cma="chezmoi add"
+alias cma="chezmoi apply"
+alias cmd="chezmoi add"
 
 # ChezMoi File
 cmf() {
