@@ -43,6 +43,7 @@ return {
                     "lua",
                     "markdown",
                     "markdown_inline",
+                    "pug",
                     "svelte",
                     "tsx",
                     "typescript",
