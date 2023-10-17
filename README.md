@@ -38,9 +38,9 @@ To see how this works, check out the [.zshrc](home/dot_zshrc.tmpl) file.
 
 This directory contains configurations for apps that I use. Currently it contains config for:
 
--   Neovim
--   Yabai
--   SKHD
+-   Neovim - this is mostly stolen from [josean](https://github.com/josean-dev/dev-environment-files)
+-   [Yabai](https://github.com/koekeishiya/yabai)
+-   [SKHD](https://github.com/koekeishiya/skhd)
 -   Karabiner
 
 ## .chezmoiexternal.toml
