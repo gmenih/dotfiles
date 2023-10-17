@@ -2,12 +2,17 @@
 return {
     {
         "catppuccin/nvim",
-        priority = 1000, -- make sure to load this before all the other start plugins
+        priority = 1000,
         config = function()
-            -- load the colorscheme here
-            -- vim.cmd([[colorscheme catppuccin-mocha]]) -- dark mode
+            require("catppuccin").setup({
+                background = {
+                    dark = "mocha",
+                    light = "latte",
+                },
+                transparent_background = true,
+            })
 
-            vim.cmd([[colorscheme catppuccin-latte]]) -- light mode
+            vim.cmd.colorscheme("catppuccin")
         end,
     },
 }
