@@ -9,7 +9,6 @@ local keymap = vim.keymap -- for conciseness
 keymap.set("i", "<esc><esc>", "<esc>:w<CR>", { desc = "Save file and exit insert mode" })
 -- clear search highlights
 keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
-
 -- delete single character without copying into register
 -- keymap.set("n", "x", '"_x')
 
@@ -28,3 +27,15 @@ keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" 
 keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" }) --  go to next tab
 keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" }) --  go to previous tab
 keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" }) --  move current buffer to new tab
+
+-- Light/Dark mode
+keymap.set("n", "<leader>bd", "<cmd>:set bg=dark<CR>", { desc = "Set background to dark" })
+keymap.set("n", "<leader>bl", "<cmd>:set bg=light<CR>", { desc = "Set background to light" })
+
+-- Buffer stuff
+keymap.set("n", "<leader>bn", "<cmd>bn<CR>", { desc = "Go to next buffer" })
+keymap.set("n", "<leader>bp", "<cmd>bp<CR>", { desc = "Go to previous buffer" })
+
+-- Keep visual selection when indenting
+keymap.set("x", ">", ">gv", { desc = "Indent selection" })
+keymap.set("x", "<", "<gv", { desc = "Unindent selection" })
