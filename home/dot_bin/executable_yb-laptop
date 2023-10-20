@@ -13,11 +13,15 @@ move_app_to_space() {
 
 }
 
+# Browsers
 move_app_to_space 1 "Arc"
 move_app_to_space 1 "Google Chrome"
+# Code editors  
 move_app_to_space 2 "Cursor"
+move_app_to_space 2 "iTerm2"
 move_app_to_space 2 "Code"
+# Chat
 move_app_to_space 3 "Discord"
 move_app_to_space 4 "Slack"
-move_app_to_space 5 "iTerm2"
+# Notes
 move_app_to_space 5 "Obsidian"

@@ -42,11 +42,14 @@ rshift + alt - j : yabai -m window --resize down:0:10
 rshift + alt - k : yabai -m window --resize up:0:10
 rshift + alt - l : yabai -m window --resize right:10:0
 
+# Close
+rshift -w: yabai -m space --destroy
+
 # Audio
-rshift - q: SwitchAudioSource -s 'Acer X34 P'
-rshift - w: SwitchAudioSource -s 'MacBook Pro Speakers'
-rshift - e: SwitchAudioSource -s 'MOMENTUM 3'
-rshift - r: SwitchAudioSource -s "Er Pods"
+rshift - a: SwitchAudioSource -s 'Acer X34 P'
+rshift - s: SwitchAudioSource -s 'MacBook Pro Speakers'
+rshift - d: SwitchAudioSource -s 'MOMENTUM 3'
+rshift - f: SwitchAudioSource -s "Er Pods"
 
 # Mouse focus
 cmd + rshift - f: yabai -m config focus_follows_mouse off
