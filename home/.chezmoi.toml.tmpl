@@ -2,6 +2,7 @@
 {{ $isArch := and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "arch") }}
 
 {{ $npmToken := onepasswordRead "op://Personal/npm_token/token" }} 
+{{ $openAiKey := onepasswordRead "op://Personal/open_ai/key" }}
 
 [data]
     version_node = "16.20.0"
@@ -17,3 +18,4 @@
     isMac = {{ $isMac }}
 
     npmToken = {{ $npmToken | quote }}
+    openAiKey = {{ $openAiKey | quote }}

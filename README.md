@@ -2,15 +2,10 @@
 
 Dotfiles for my machines, managed by [Chezmoi](https://chezmoi.io).
 
-Initializing this repository with Chezmoi _should_ install all required packages, set preferred system configs, and provide all of my commonly used zsh functions and scripts, as well as configurations for some of the tools that I use. Since I use both macOS and Linux, a lot contnet is split into `arch` and `darwin`, where `.chezmoiignore` makes sure that only files for the appropriate system are included.
-
-To init, (with Chezmoi installed), run
-
-```bash
-chezmoi init --apply gmenih
-```
-
-This will pull the repository, execute scripts, and link files into your home directory.
+-   `r`: Reset
+-   `C-e`: New session (prompts for name)
+-   `C-d`: Set catppuccin flavour to dark
+-   `C-l`: Set catppuccin flavour to light
 
 # Contents
 
