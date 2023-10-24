@@ -2,11 +2,11 @@
 
 alias smon='ssh monkey'
 
-# SSH Ports Monkey
+# Forward Ports Monkey
 # Forwards ports I commonly use via SSH tunnel,
 # and connects to `monkey` so that I can do my
 # development there
-function spm() {
+function fpm() {
   local default_ports=(8000 8080 3000 4321 9000)
   local all_ports=("${default_ports[@]}" "$@")
   local ssh_command="ssh"
