@@ -6,5 +6,10 @@ return {
         "sindrets/diffview.nvim", -- optional
         "ibhagwan/fzf-lua", -- optional
     },
-    config = true,
+    config = function()
+        require("neogit").setup()
+        require("which-key").register({
+            ["<leader>ng"] = { "<cmd>Neogit<CR>", "Open Neogit" },
+        })
+    end,
 }

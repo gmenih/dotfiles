@@ -9,7 +9,7 @@ return {
     event = "VeryLazy",
     config = function()
         require("which-key").register({
-            c = {
+            ["<leader>c"] = {
                 name = "ChatGPT",
                 c = { "<cmd>ChatGPT<CR>", "Open" },
                 e = { "<cmd>ChatGPTEditWithInstruction<CR>", "Edit with instruction", mode = { "n", "v" } },

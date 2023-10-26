@@ -12,6 +12,9 @@ return {
 
         telescope.setup({
             defaults = {
+                pickers = {
+                    hidden = true,
+                },
                 file_ignore_patterns = { "node_modules", "git", "*.min.js" },
                 path_display = { "truncate " },
                 mappings = {
