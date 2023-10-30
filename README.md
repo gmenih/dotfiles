@@ -25,7 +25,7 @@ The rest of the files are spread around different directories.
 
 ## dot_zshrc.d > .zshrc.d
 
-`.zshrc.d` is a configuration directory for ZSH, where I keep all of my helper functions, aliases, and configuration files for ZSH. It includes shared scripts (in `00-shared`, prefixed with 00 for source order), scripts that I only need on macOS (in the `darwin` directory), and scripts I only need on Linux (in the `arch` directory). Each directory contains sub-directories, where the name of the directory represents a command that needs to be present on the system in order for files in the directory to be sourced. E.g. `arch/git/git-alias.zsh` would only be sourced on Linux, if the `git` command is installed.
+`.zshrc.d` is a configuration directory for ZSH, where I keep all of my helper functions, aliases, and configuration files for ZSH. It includes shared scripts (in `00-shared`, prefixed with 00 for source order), scripts that I only need on macOS (in the `darwin` directory), and scripts I only need on Linux (in the `arch` directory). Each directory contains sub-directories, where the name of the directory represents a command that needs be present on the system in order for files in the directory to be sourced. E.g. `arch/git/git-alias.zsh` would only be sourced on Linux, if the `git` command is installed.
 
 To see how this works, check out the [.zshrc](home/dot_zshrc.tmpl) file.
 

@@ -10,6 +10,9 @@ opt.shiftwidth = 2 -- 4 spaces for indent width
 opt.expandtab = true -- expand tab to spaces
 opt.autoindent = true -- copy indent from current line when starting new one
 
+-- i want my bash aliases
+opt.shellcmdflag = "-ic"
+
 -- line wrapping
 opt.wrap = true -- disable line wrapping TODO: make togglable
 

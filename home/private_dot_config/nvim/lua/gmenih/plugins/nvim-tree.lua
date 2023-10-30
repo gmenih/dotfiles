@@ -16,7 +16,7 @@ return {
         nvimtree.setup({
             view = {
                 width = 35,
-                relativenumber = true,
+                relativenumber = false,
                 side = "right",
             },
             -- change folder arrow icons
@@ -33,9 +33,6 @@ return {
                     },
                 },
             },
-            -- disable window_picker for
-            -- explorer to work well with
-            -- window splits
             actions = {
                 open_file = {
                     window_picker = {
@@ -49,15 +46,6 @@ return {
             git = {
                 ignore = false,
             },
-            on_attach = function(bufnr)
-                local api = require("nvim-tree.api")
-
-                api.config.mappings.default_on_attach(bufnr)
-
-                local function opts(desc)
-                    return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
-                end
-            end,
         })
 
         -- set keymaps
