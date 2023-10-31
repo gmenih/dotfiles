@@ -4,4 +4,4 @@ alias tn='tmux new -s'
 alias tls='tmux ls'
 alias tksv='tmux kill-server'
 
-export PATH=$HOME/.config/tmux/plugins/t-smart-tmux-session-manager/bin:$PATH
+export PATH=$HOME/.tmux/plugins/t-smart-tmux-session-manager/bin:$PATH
