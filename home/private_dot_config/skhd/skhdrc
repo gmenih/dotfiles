@@ -56,4 +56,5 @@ cmd + rshift - f: yabai -m config focus_follows_mouse off
 rshift - f: yabai -m config focus_follows_mouse autofocus
 
 # Layouts
-rshift - g: yb-laptop
+rshift - g: yb-layout "laptop"
+rshift - h: yb-layout "wide"
