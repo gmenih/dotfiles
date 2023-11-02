@@ -57,4 +57,4 @@ rshift - f: yabai -m config focus_follows_mouse autofocus
 
 # Layouts
 rshift - g: yb-layout "laptop"
-rshift - h: yb-layout "wide"
+rshift - b: yb-layout "wide"

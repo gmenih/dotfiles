@@ -23,6 +23,7 @@ return {
         lspconfig["tailwindcss"].setup({})
         lspconfig["gopls"].setup({})
         lspconfig["astro"].setup({})
+        lspconfig["templ"].setup({})
         --
         lspconfig["emmet_ls"].setup({
             filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less", "svelte", "pug" },

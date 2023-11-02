@@ -32,6 +32,15 @@ return {
                         },
                     },
                 },
+                special_files = {
+                    "README.md",
+                    "go.mod",
+                    "go.sum",
+                    "Makefile",
+                    "package.json",
+                    "package-lock.json",
+                    ".env",
+                },
             },
             actions = {
                 open_file = {
