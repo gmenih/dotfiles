@@ -45,7 +45,9 @@ return {
                     "markdown",
                     "markdown_inline",
                     "pug",
+                    "python",
                     "svelte",
+                    "terraform",
                     "tsx",
                     "typescript",
                     "vim",
@@ -77,6 +79,10 @@ return {
             }
 
             vim.treesitter.language.register("templ", "templ")
+
+            vim.opt.foldlevel = 20
+            vim.opt.foldmethod = "expr"
+            vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
         end,
     },
 }

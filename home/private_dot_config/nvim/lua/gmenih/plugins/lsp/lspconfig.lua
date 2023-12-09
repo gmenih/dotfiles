@@ -16,14 +16,16 @@ return {
             vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
         end
 
-        -- configure html server
-        lspconfig["html"].setup({})
-        lspconfig["tsserver"].setup({})
-        lspconfig["cssls"].setup({})
-        lspconfig["tailwindcss"].setup({})
-        lspconfig["gopls"].setup({})
         lspconfig["astro"].setup({})
+        lspconfig["cssls"].setup({})
+        lspconfig["gopls"].setup({})
+        lspconfig["html"].setup({})
+        lspconfig["pyright"].setup({})
+        lspconfig["tailwindcss"].setup({})
         lspconfig["templ"].setup({})
+        lspconfig["terraformls"].setup({})
+        lspconfig["tsserver"].setup({})
+        lspconfig["metals"].setup({})
         --
         lspconfig["emmet_ls"].setup({
             filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less", "svelte", "pug" },
