@@ -8,7 +8,7 @@ local keymap = vim.keymap -- for conciseness
 
 keymap.set("i", "<esc><esc>", "<esc>:w<CR>", { desc = "Save file and exit insert mode" })
 -- clear search highlights
-keymap.set("n", "nh", ":nohl<CR>", { desc = "Clear search highlights" })
+keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
 -- opposite of u = shift+u
 keymap.set("n", "U", ":redo<CR>", { desc = "Redo" })
 
@@ -28,13 +28,13 @@ keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" }
 -- tab management
 keymap.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "Open new tab" }) -- open new tab
 keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" }) -- close current tab
-keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" }) --  go to next tab
-keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" }) --  go to previous tab
+-- keymap.set("n", "<leader>tl", "<cmd>tabn<CR>", { desc = "Go to next tab" }) --  go to next tab
+-- keymap.set("n", "<leader>th", "<cmd>tabp<CR>", { desc = "Go to previous tab" }) --  go to previous tab
 keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" }) --  move current buffer to new tab
 
 -- Light/Dark mode
-keymap.set("n", "<leader>bd", "<cmd>:set bg=dark<CR>", { desc = "Set background to dark" })
-keymap.set("n", "<leader>bl", "<cmd>:set bg=light<CR>", { desc = "Set background to light" })
+keymap.set("n", "<leader>bw", "<cmd>:set bg=dark<CR>", { desc = "Set background to dark" })
+keymap.set("n", "<leader>be", "<cmd>:set bg=light<CR>", { desc = "Set background to light" })
 
 -- Buffer stuff
 keymap.set("n", "<leader>bn", "<cmd>bn<CR>", { desc = "Go to next buffer" })

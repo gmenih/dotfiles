@@ -19,7 +19,7 @@ return {
                 json = { "prettier" },
                 lua = { "stylua" },
                 markdown = { "prettier" },
-                python = { "isort", "black" },
+                python = { "pep8" },
                 svelte = { "prettier" },
                 typescript = { "prettier" },
                 typescriptreact = { "prettier" },

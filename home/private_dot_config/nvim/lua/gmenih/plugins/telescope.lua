@@ -16,7 +16,7 @@ return {
                     hidden = true,
                 },
                 file_ignore_patterns = { "node_modules", "git", "*.min.js" },
-                path_display = { "truncate " },
+                path_display = { "truncate" },
                 mappings = {
                     i = {
                         ["<C-k>"] = actions.move_selection_previous, -- move to prev result
