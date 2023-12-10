@@ -23,6 +23,7 @@ if [[ "$screen" == "laptop" ]]; then
     # Code editors  
     move_app_to_space 2 "Cursor"
     move_app_to_space 2 "iTerm2"
+    move_app_to_space 2 "WezTerm"
     move_app_to_space 2 "Code"
     # Chat
     move_app_to_space 3 "Discord"
@@ -35,6 +36,8 @@ else
     move_app_to_space 1 "Google Chrome"
     # Code editors  
     move_app_to_space 1 "Cursor"
+    move_app_to_space 2 "WezTerm"
+    move_app_to_space 2 "Code"
     move_app_to_space 1 "iTerm2"
     move_app_to_space 1 "Code"
     # Chat
