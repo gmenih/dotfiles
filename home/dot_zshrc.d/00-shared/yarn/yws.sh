@@ -1,4 +1,4 @@
-alias yws="yarn workspace"
+alias yw="yarn workspace"
 alias ye="yarn"
 alias ys="yarn start"
 alias yt="yarn test"

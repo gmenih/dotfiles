@@ -1,4 +1,5 @@
 alias asi="asdf install"
 alias asls="asdf list-all"
-alias asl="asdf list"
+alias asli="asdf list"
+alias asl="asdf local"
 alias asg="asdf global"
