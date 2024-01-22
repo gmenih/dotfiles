@@ -1,3 +1,8 @@
+{{ if .isMac }}
+Include ~/.orbstack/ssh/config
+{{ end}}
+Include ~/.ssh/work_config
+
 Host monkey
     LocalForward 3000 localhost:3000
     LocalForward 4321 localhost:4321
@@ -16,13 +21,19 @@ Host pi
     User admin
     IdentityFile ~/.ssh/monkey
     HostName pipipi.{{ .tsDns }}
-    
-Host 0x
-    User gmenih
-    HostName 0x676d.{{ .tsDns }}
 
 Host github.com
     User git
     IdentityFile ~/.ssh/github
     HostName github.com
 
+Host raid
+    User root
+    IdentityFile ~/.ssh/monkey
+    HostName 192.168.12.40
+
+
+{{ if .isMac }}
+Host *
+  IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+{{ end }}

@@ -4,6 +4,9 @@
 {{ $npmToken := onepasswordRead "op://Personal/npm_token/token" }} 
 {{ $openAiKey := onepasswordRead "op://Personal/open_ai/key" }}
 
+[age]
+    identity="{{ .chezmoi.homeDir }}/.config/age-key.txt"
+    recipient = "age1e9uklc6sxxhz7hywwyvn9z5a0yj9j06tgt4d223fepqq9gmes54q9ywr86"
 [data]
     version_node = "20.10.0"
     version_python = "3.11.0"

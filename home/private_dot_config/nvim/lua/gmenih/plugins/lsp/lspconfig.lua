@@ -19,13 +19,16 @@ return {
         lspconfig["astro"].setup({})
         lspconfig["cssls"].setup({})
         lspconfig["gopls"].setup({})
+        lspconfig["graphql"].setup({
+            filetypes = { "typescript", "javascript", "typescriptreact", "javascriptreact", "svelte", "graphql" },
+        })
         lspconfig["html"].setup({})
         lspconfig["pyright"].setup({})
         lspconfig["tailwindcss"].setup({})
         lspconfig["templ"].setup({})
         lspconfig["terraformls"].setup({})
         lspconfig["tsserver"].setup({})
-        lspconfig["metals"].setup({})
+        lspconfig["prismals"].setup({})
         --
         lspconfig["emmet_ls"].setup({
             filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less", "svelte", "pug" },
