@@ -56,15 +56,18 @@ return {
                 theme = my_lualine_theme,
             },
             sections = {
-                lualine_x = {
-                    {
-                        lazy_status.updates,
-                        cond = lazy_status.has_updates,
-                        color = { fg = "#ff9e64" },
-                    },
-                    { "encoding" },
-                    { "fileformat" },
+                lualine_a = {
+                    { "mode", upper = true },
+                },
+                lualine_b = {},
+                lualine_c = {},
+                lualine_x = {},
+                lualine_y = {
                     { "filetype" },
+                    { "diff" },
+                },
+                lualine_z = {
+                    { "branch" },
                 },
             },
         })
