@@ -36,6 +36,9 @@ rshift - j : yabai -m window --focus south
 rshift - k : yabai -m window --focus north
 rshift - l : yabai -m window --focus east
 
+# Full screen
+cmd + rshift - f: yabai -m window native-fullscreen
+
 # Window Resize
 rshift + alt - h : yabai -m window --resize left:10:0
 rshift + alt - j : yabai -m window --resize down:0:10
