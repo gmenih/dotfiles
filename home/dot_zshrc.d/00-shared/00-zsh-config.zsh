@@ -2,8 +2,6 @@
 
 # Settings
 export DISABLE_UPDATE_PROMPT=true
-export ZSH_CUSTOM="$HOME/.omzsh-custom"
-ZSH_THEME="gamuze"
 
 plugins=(
     git
