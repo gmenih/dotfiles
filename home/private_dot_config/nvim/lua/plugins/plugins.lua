@@ -6,9 +6,10 @@ return {
       { "<leader>mj", "<cmd>TSJToggle<cr>", desc = "Toggle Treesitter Join" },
     },
     cmd = { "TSJToggle", "TSJSpliut", "TSJoin" },
-    opts = { use_default_keymaps = false },
+    opts = { use_default_keymaps = false, max_join_length = 512 },
     -- Remap Bufferline keys
   },
+  -- Bufferline BL binding
   {
     "akinsho/bufferline.nvim",
     keys = {
@@ -19,24 +20,25 @@ return {
       },
     },
   },
+  -- Move notify to bottom so it doesnt cover NeoTree
   {
-    "rcarriga/nvim-notify",
-    opts = function(_, opts)
-      opts.top_down = false
-    end,
+    "folke/snacks.nvim",
+    opts = {
+      notifier = {
+        top_down = false,
+      },
+    },
   },
   -- Auto Dark mode
   {
     "f-person/auto-dark-mode.nvim",
     config = {
-      update_interval = 1000,
+      update_interval = 5000,
       set_dark_mode = function()
-        vim.cmd("colorscheme catppuccin-frappe")
-        vim.api.nvim_set_option("background", "dark")
+        vim.cmd("colorscheme catppuccin-mocha")
       end,
       set_light_mode = function()
         vim.cmd("colorscheme catppuccin-latte")
-        vim.api.nvim_set_option("background", "light")
       end,
     },
   },
@@ -59,4 +61,26 @@ return {
     },
   },
   { "folke/todo-comments.nvim" },
+  -- Neogit
+  {
+    "NeogitOrg/neogit",
+    dependencies = {
+      "nvim-lua/plenary.nvim", -- required
+      "nvim-telescope/telescope.nvim", -- optional
+      "sindrets/diffview.nvim", -- optional
+      "ibhagwan/fzf-lua", -- optional
+    },
+    keys = {
+      { "<leader>ng", "<cmd>Neogit<cr>", desc = "Open NeoGit" },
+    },
+    opts = {},
+  },
+
+  -- NeoTree on the right
+  {
+    "nvim-neo-tree/neo-tree.nvim",
+    opts = function(_, opts)
+      opts.window.position = "right"
+    end,
+  },
 }
