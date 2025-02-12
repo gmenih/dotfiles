@@ -6,13 +6,21 @@ osascript -e 'tell application "System Preferences" to quit'
 sudo -v
 
 # Keep-alive: update existing `sudo` time stamp until `.macos` has finished
-while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+while true; do
+    sudo -n true
+    sleep 60
+    kill -0 "$$" || exit
+done 2>/dev/null &
 
 ###############################################################################
 # General UI/UX                                                               #
 ###############################################################################
 
 # Set computer name (as done via System Preferences → Sharing)
+sudo scutil --set ComputerName "Bishop"
+sudo scutil --set HostName "Bishop"
+sudo scutil --set LocalHostName "Bishop"
+sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "Bishop"
 
 # Disable automatic capitalization as it’s annoying when typing code
 defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
@@ -33,7 +41,27 @@ defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
 sudo defaults write /Library/Preferences/com.apple.loginwindow showInputMenu -bool true
 
 # Set the timezone; see `sudo systemsetup -listtimezones` for other values
-sudo systemsetup -settimezone "Europe/Ljubljana" > /dev/null
+sudo systemsetup -settimezone "Europe/Ljubljana" >/dev/null
+
+###############################################################################
+# Keyboard Shortcuts                                                          #
+###############################################################################
+
+# Unbind "Ctrl + Space"
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 60 "{enabled = 0;}"
+
+# Bind language switch to "Cmd + Space"
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 61 "{enabled = 1; value = { parameters = (32, 49, 1048576); type = 'standard'; }; }"
+
+# Restart SystemUIServer to apply changes
+killall SystemUIServer
+
+###############################################################################
+# Dock                                                                        #
+###############################################################################
+
+# Set the icon size of Dock items to 36 pixels
+defaults write com.apple.dock tilesize -int 36
 
 ###############################################################################
 # Screen                                                                      #
@@ -53,7 +81,6 @@ defaults write com.apple.screencapture type -string "png"
 # Enable subpixel font rendering on non-Apple LCDs
 # Reference: https://github.com/kevinSuttle/macOS-Defaults/issues/17#issuecomment-266633501
 defaults write NSGlobalDomain AppleFontSmoothing -int 1
-
 
 ###############################################################################
 # Finder                                                                      #
