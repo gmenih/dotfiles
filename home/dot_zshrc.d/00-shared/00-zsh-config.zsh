@@ -6,11 +6,9 @@ export DISABLE_UPDATE_PROMPT=true
 plugins=(
     git
     docker
-    ag
     asdf
     1password
     aws
-    fd
     npm
 )
 
