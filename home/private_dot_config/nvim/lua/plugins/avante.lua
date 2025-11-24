@@ -5,14 +5,17 @@ return {
   version = false, -- Set this to "*" to always pull the latest release version, or set it to false to update to the latest code changes.
   opts = {
     -- provider = "gemini",
+    instructions_files = "CLAUDE.md",
     provider = "claude",
+    providers = {
+      gemini = {
+        model = "gemini-2.5-pro-exp-03-25",
+      },
+      claude = {
+        model = "claude-3-7-sonnet-latest",
+      },
+    },
     auto_suggestions_provider = "claude",
-    gemini = {
-      model = "gemini-2.5-pro-exp-03-25",
-    },
-    claude = {
-      model = "claude-3-7-sonnet-latest",
-    },
     mappings = {
       ["<leader>aa"] = ":AvanteFocus",
       ["<leader>af"] = ":AvanteAsk",

@@ -3,25 +3,6 @@ Include ~/.orbstack/ssh/config
 {{ end}}
 Include ~/.ssh/work_config
 
-Host monkey
-    LocalForward 3000 localhost:3000
-    LocalForward 4321 localhost:4321
-    LocalForward 8000 localhost:8000
-    LocalForward 8080 localhost:8080
-    LocalForward 9000 localhost:9000
-    LocalForward 9229 localhost:9229
-
-    LogLevel FATAL
-
-    User code
-    IdentityFile ~/.ssh/monkey
-    HostName monkey.{{ .tsDns }}
-
-Host pi
-    User admin
-    IdentityFile ~/.ssh/monkey
-    HostName pipipi.{{ .tsDns }}
-
 Host github.com
     User git
     IdentityFile ~/.ssh/github
