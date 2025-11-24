@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Query all displays
+displays_json=$(yabai -m query --displays)
+
+display_count=$(echo "$displays_json" | jq 'length')
+if ((display_count < 2)); then
+    echo "Need at least 2 displays to swap. Found: $display_count" >&2
+    exit 1
+fi
+
+# Get the IDs of the last two displays (sorted by index = left→right)
+readarray -t display_ids < <(
+    echo "$displays_json" |
+        jq 'sort_by(.index) | .[-2:] | .[].id'
+)
+
+d1="${display_ids[0]}"
+d2="${display_ids[1]}"
+
+echo "Swapping windows between displays: $d1 and $d2"
+
+# Remember focused window and space (optional, nice UX)
+spaces_json=$(yabai -m query --spaces)
+focused_space=$(echo "$spaces_json" | jq '.[] | select(.focused == 1) | .index')
+focused_window=$(yabai -m query --windows | jq '.[] | select(.focused == 1) | .id')
+
+echo "Focused space before swap: ${focused_space:-none}"
+echo "Focused window before swap: ${focused_window:-none}"
+
+# Get windows on each display (by id)
+windows_json=$(yabai -m query --windows)
+
+readarray -t win_d1 < <(
+    echo "$windows_json" | jq ".[] | select(.display == ${d1}) | .id"
+)
+
+readarray -t win_d2 < <(
+    echo "$windows_json" | jq ".[] | select(.display == ${d2}) | .id"
+)
+
+echo "Windows on display $d1: ${win_d1[*]}"
+echo "Windows on display $d2: ${win_d2[*]}"
+
+# Move windows d1 -> d2
+for wid in "${win_d1[@]}"; do
+    echo "Moving window $wid from display $d1 to $d2"
+    yabai -m window "$wid" --display "$d2"
+done
+
+# Move windows d2 -> d1
+for wid in "${win_d2[@]}"; do
+    echo "Moving window $wid from display $d2 to $d1"
+    yabai -m window "$wid" --display "$d1"
+done
+
+# Restore focus if we had a focused space/window
+if [[ -n "${focused_space:-}" && "$focused_space" != "null" ]]; then
+    yabai -m space --focus "$focused_space"
+fi
+
+if [[ -n "${focused_window:-}" && "$focused_window" != "null" ]]; then
+    yabai -m window --focus "$focused_window"
+fi
