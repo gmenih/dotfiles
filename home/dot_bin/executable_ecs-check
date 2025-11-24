@@ -1,0 +1,352 @@
+#!/usr/bin/env bash
+
+set -e
+
+# Ensure we're running in bash 4+
+if [ -z "$BASH_VERSION" ] || [ "${BASH_VERSION%%.*}" -lt 4 ]; then
+    echo "Error: This script requires bash 4 or higher"
+    echo "Current shell: $SHELL"
+    exit 1
+fi
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+GRAY='\033[0;90m'
+BOLD='\033[1m'
+DIM='\033[2m'
+NC='\033[0m' # No Color
+
+# Icons
+ICON_DEPLOYMENT="🚀"
+ICON_RUNNING="✅"
+ICON_PENDING="⏳"
+ICON_STOPPING="🔄"
+ICON_STOPPED="❌"
+ICON_CLUSTER="📦"
+ICON_NEW="✨"
+ICON_REMOVED="💀"
+
+# Check if profile is provided
+if [ -z "$1" ]; then
+    echo "Usage: ecs-check <profile> [service-filter]"
+    echo "Example: ecs-check pump-stg backend"
+    exit 1
+fi
+
+PROFILE=$1
+SERVICE_FILTER=${2:-""}
+REGION=$(aws configure get region --profile "$PROFILE" || echo "us-east-1")
+
+# Check if user is logged in via SSO
+echo -e "${CYAN}Checking AWS SSO login status...${NC}"
+if ! aws sts get-caller-identity --profile "$PROFILE" &>/dev/null; then
+    echo -e "${YELLOW}Not logged in. Initiating SSO login...${NC}"
+    aws sso login --profile "$PROFILE"
+
+    # Verify login succeeded
+    if ! aws sts get-caller-identity --profile "$PROFILE" &>/dev/null; then
+        echo -e "${RED}SSO login failed. Exiting.${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}SSO login successful!${NC}\n"
+else
+    echo -e "${GREEN}Already logged in.${NC}\n"
+fi
+
+# Function to match service name (fuzzy)
+match_service() {
+    local service=$1
+    local filter=$2
+
+    if [ -z "$filter" ]; then
+        return 0 # No filter, match all
+    fi
+
+    # Case-insensitive substring match
+    if echo "$service" | grep -qi "$filter"; then
+        return 0 # Match
+    fi
+
+    return 1 # No match
+}
+
+# State tracking
+declare -A KNOWN_CLUSTERS
+declare -A KNOWN_SERVICES
+declare -A KNOWN_TASKS
+declare -A LINE_MAP
+FIRST_RUN=true
+
+# Function to calculate uptime
+calculate_uptime() {
+    local start_time=$1
+    local now=$(date +%s)
+    local start_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${start_time:0:19}" +%s 2>/dev/null || echo $now)
+    local diff=$((now - start_epoch))
+
+    local days=$((diff / 86400))
+    local hours=$(((diff % 86400) / 3600))
+    local mins=$(((diff % 3600) / 60))
+
+    if [ $days -gt 0 ]; then
+        echo "${days}d ${hours}h"
+    elif [ $hours -gt 0 ]; then
+        echo "${hours}h ${mins}m"
+    else
+        echo "${mins}m"
+    fi
+}
+
+# Function to get task icon and color
+get_task_status() {
+    local status=$1
+    local health=$2
+
+    case "$status" in
+    "RUNNING")
+        if [ "$health" = "HEALTHY" ] || [ -z "$health" ]; then
+            echo -e "${GREEN}${ICON_RUNNING}${NC}"
+        else
+            echo -e "${YELLOW}${ICON_RUNNING}${NC}"
+        fi
+        ;;
+    "PENDING")
+        echo -e "${YELLOW}${ICON_PENDING}${NC}"
+        ;;
+    "STOPPING" | "DEACTIVATING" | "DEPROVISIONING")
+        echo -e "${YELLOW}${ICON_STOPPING}${NC}"
+        ;;
+    "STOPPED" | "DEACTIVATED" | "DEPROVISIONED")
+        echo -e "${RED}${ICON_STOPPED}${NC}"
+        ;;
+    *)
+        echo -e "${GRAY}${ICON_STOPPED}${NC}"
+        ;;
+    esac
+}
+
+# Function to get deployment status
+get_deployment_status() {
+    local status=$1
+    local rollout=$2
+
+    if [ "$status" = "PRIMARY" ]; then
+        if [ "$rollout" = "COMPLETED" ]; then
+            echo -e "${GREEN}${ICON_DEPLOYMENT}${NC}"
+        else
+            echo -e "${YELLOW}${ICON_DEPLOYMENT}${NC}"
+        fi
+    else
+        echo -e "${GRAY}${ICON_DEPLOYMENT}${NC}"
+    fi
+}
+
+# Function to save cursor position
+save_cursor() {
+    echo -ne "\033[s"
+}
+
+# Function to restore cursor position
+restore_cursor() {
+    echo -ne "\033[u"
+}
+
+# Function to move cursor to line
+goto_line() {
+    local line=$1
+    echo -ne "\033[${line};0H"
+}
+
+# Function to clear from cursor to end of line
+clear_line() {
+    echo -ne "\033[K"
+}
+
+# Function to render content to buffer
+render_to_buffer() {
+    local content="$1"
+    echo -e "$content"
+}
+
+# Main loop
+while true; do
+    # Build output buffer
+    OUTPUT_BUFFER=""
+    CURRENT_LINE=1
+
+    # Header (always redrawn)
+    OUTPUT_BUFFER+="${BOLD}${CYAN}ECS Status Monitor${NC}\n\n"
+    OUTPUT_BUFFER+="  ${GRAY}profile:${NC} ${BLUE}${PROFILE}${NC}\n"
+    OUTPUT_BUFFER+="  ${GRAY}region:${NC}  ${BLUE}${REGION}${NC}\n"
+    if [ -n "$SERVICE_FILTER" ]; then
+        OUTPUT_BUFFER+="  ${GRAY}filter:${NC}  ${YELLOW}${SERVICE_FILTER}${NC}\n"
+    fi
+    OUTPUT_BUFFER+="  ${GRAY}updated:${NC} ${BLUE}$(date '+%Y-%m-%d %H:%M:%S')${NC}\n\n"
+
+    CURRENT_LINE=7
+
+    # Get all clusters
+    clusters=$(aws ecs list-clusters --profile "$PROFILE" --region "$REGION" 2>/dev/null | jq -r '.clusterArns[]' | awk -F'/' '{print $NF}')
+
+    # Track new state
+    declare -A NEW_CLUSTERS
+    declare -A NEW_SERVICES
+    declare -A NEW_TASKS
+
+    if [ -z "$clusters" ]; then
+        OUTPUT_BUFFER+="  ${RED}No clusters found${NC}\n"
+    else
+        for cluster in $clusters; do
+            NEW_CLUSTERS[$cluster]=1
+
+            # Check if cluster is new
+            cluster_marker=""
+            if [ -z "${KNOWN_CLUSTERS[$cluster]}" ] && [ "$FIRST_RUN" = false ]; then
+                cluster_marker=" ${ICON_NEW} ${DIM}new${NC}"
+            fi
+
+            OUTPUT_BUFFER+="${BOLD}${CYAN}${ICON_CLUSTER} ${cluster}${NC}${cluster_marker}\n"
+
+            # Get all services in this cluster
+            services=$(aws ecs list-services --cluster "$cluster" --profile "$PROFILE" --region "$REGION" 2>/dev/null | jq -r '.serviceArns[]' | awk -F'/' '{print $NF}')
+
+            if [ -z "$services" ]; then
+                OUTPUT_BUFFER+="  ${GRAY}No services found${NC}\n\n"
+                continue
+            fi
+
+            for service in $services; do
+                # Check if service matches filter
+                if ! match_service "$service" "$SERVICE_FILTER"; then
+                    continue
+                fi
+
+                service_key="${cluster}:${service}"
+                NEW_SERVICES[$service_key]=1
+
+                # Describe service to get deployment info
+                service_info=$(aws ecs describe-services --cluster "$cluster" --services "$service" --profile "$PROFILE" --region "$REGION" 2>/dev/null)
+
+                # Check if service is new
+                service_marker=""
+                if [ -z "${KNOWN_SERVICES[$service_key]}" ] && [ "$FIRST_RUN" = false ]; then
+                    service_marker=" ${ICON_NEW} ${DIM}new${NC}"
+                fi
+
+                # Check if deployment is in progress
+                deployment_count=$(echo "$service_info" | jq '.services[0].deployments | length')
+                has_incomplete=$(echo "$service_info" | jq '.services[0].deployments[] | select(.rolloutState != "COMPLETED")' | wc -l | tr -d ' ')
+
+                deploying_marker=""
+                if [ "$deployment_count" -gt 1 ] || [ "$has_incomplete" -gt 0 ]; then
+                    deploying_marker=" ${YELLOW}${ICON_DEPLOYMENT} DEPLOYING${NC}"
+                fi
+
+                OUTPUT_BUFFER+="\n  ${BOLD}${service}${NC}${service_marker}${deploying_marker}\n"
+
+                # Get deployments
+                deployments=$(echo "$service_info" | jq -c '.services[0].deployments[]')
+
+                if [ -n "$deployments" ]; then
+                    while read -r deployment; do
+                        dep_id=$(echo "$deployment" | jq -r '.id' | cut -d'-' -f1)
+                        dep_status=$(echo "$deployment" | jq -r '.status')
+                        dep_rollout=$(echo "$deployment" | jq -r '.rolloutState')
+                        dep_desired=$(echo "$deployment" | jq -r '.desiredCount')
+                        dep_running=$(echo "$deployment" | jq -r '.runningCount')
+                        dep_pending=$(echo "$deployment" | jq -r '.pendingCount')
+
+                        icon=$(get_deployment_status "$dep_status" "$dep_rollout")
+
+                        OUTPUT_BUFFER+="    ${icon} ${GRAY}deployment:${NC} ${dep_id} ${GRAY}|${NC} ${dep_status} ${GRAY}|${NC} running: ${dep_running}/${dep_desired} ${GRAY}|${NC} pending: ${dep_pending}\n"
+                    done <<<"$deployments"
+                fi
+
+                # Get tasks for this service
+                task_arns=$(aws ecs list-tasks --cluster "$cluster" --service-name "$service" --profile "$PROFILE" --region "$REGION" 2>/dev/null | jq -r '.taskArns[]')
+
+                if [ -n "$task_arns" ]; then
+                    OUTPUT_BUFFER+="    ${GRAY}tasks:${NC}\n"
+
+                    # Describe tasks to get details
+                    task_details=$(aws ecs describe-tasks --cluster "$cluster" --tasks $task_arns --profile "$PROFILE" --region "$REGION" 2>/dev/null | jq -c '.tasks[]')
+
+                    while read -r task; do
+                        task_id=$(echo "$task" | jq -r '.taskArn' | awk -F'/' '{print $NF}')
+                        task_status=$(echo "$task" | jq -r '.lastStatus')
+                        task_health=$(echo "$task" | jq -r '.healthStatus // empty')
+                        task_started=$(echo "$task" | jq -r '.startedAt // empty')
+                        task_def_arn=$(echo "$task" | jq -r '.taskDefinitionArn')
+                        task_revision=$(echo "$task_def_arn" | awk -F':' '{print $NF}')
+
+                        task_key="${service_key}:${task_id}"
+                        NEW_TASKS[$task_key]=1
+
+                        icon=$(get_task_status "$task_status" "$task_health")
+
+                        # Check if task is new
+                        task_marker=""
+                        if [ -z "${KNOWN_TASKS[$task_key]}" ] && [ "$FIRST_RUN" = false ]; then
+                            task_marker=" ${ICON_NEW}"
+                        fi
+
+                        if [ -n "$task_started" ]; then
+                            uptime=$(calculate_uptime "$task_started")
+                            OUTPUT_BUFFER+="      ${icon} ${CYAN}#${task_revision}${NC} ${GRAY}${uptime}${NC} ${task_id:0:12}${task_marker}\n"
+                        else
+                            OUTPUT_BUFFER+="      ${icon} ${CYAN}#${task_revision}${NC} ${GRAY}---${NC}     ${task_id:0:12}${task_marker}\n"
+                        fi
+                    done <<<"$task_details"
+                else
+                    OUTPUT_BUFFER+="    ${GRAY}tasks: none${NC}\n"
+                fi
+            done
+
+            OUTPUT_BUFFER+="\n"
+        done
+
+        # Check for removed clusters
+        for known_cluster in "${!KNOWN_CLUSTERS[@]}"; do
+            if [ -z "${NEW_CLUSTERS[$known_cluster]}" ]; then
+                OUTPUT_BUFFER+="${DIM}${ICON_REMOVED} ${known_cluster} ${GRAY}(removed)${NC}\n"
+            fi
+        done
+    fi
+
+    OUTPUT_BUFFER+="\n${GRAY}Press Ctrl+C to exit | Refresh: 5s${NC}\n"
+
+    # Clear screen only on first run
+    if [ "$FIRST_RUN" = true ]; then
+        clear
+        FIRST_RUN=false
+    else
+        # Move cursor to top
+        tput cup 0 0
+    fi
+
+    # Render output
+    echo -e "$OUTPUT_BUFFER"
+
+    # Update known state
+    KNOWN_CLUSTERS=()
+    for cluster in "${!NEW_CLUSTERS[@]}"; do
+        KNOWN_CLUSTERS[$cluster]=1
+    done
+
+    KNOWN_SERVICES=()
+    for service in "${!NEW_SERVICES[@]}"; do
+        KNOWN_SERVICES[$service]=1
+    done
+
+    KNOWN_TASKS=()
+    for task in "${!NEW_TASKS[@]}"; do
+        KNOWN_TASKS[$task]=1
+    done
+
+    # Wait 5 seconds before refresh
+    sleep 5
+done
