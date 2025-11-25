@@ -1,0 +1,220 @@
+#!/usr/bin/env bash
+
+set -e
+
+# Ensure we're running in bash 4+
+if [ -z "$BASH_VERSION" ] || [ "${BASH_VERSION%%.*}" -lt 4 ]; then
+    echo "Error: This script requires bash 4 or higher"
+    echo "Current shell: $SHELL"
+    exit 1
+fi
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+GRAY='\033[0;90m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
+# Check if required parameters are provided
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "Usage: ecs-tail <profile> <service-name> [options]"
+    echo ""
+    echo "Arguments:"
+    echo "  profile       AWS profile to use (e.g., pump-prd)"
+    echo "  service-name  ECS service name to tail logs for"
+    echo ""
+    echo "Options:"
+    echo "  --since <duration>     Show logs since duration (e.g., 1h, 30m, 1d) [default: 10m]"
+    echo "  --follow              Follow log output (like tail -f) [default: true]"
+    echo "  --no-follow           Don't follow log output"
+    echo "  --filter <pattern>    Filter logs by CloudWatch filter pattern"
+    echo "  --grep <text>         Filter logs by simple text match (case-insensitive)"
+    echo "  --format <format>     Output format: short, detailed, json [default: detailed]"
+    echo ""
+    echo "Filter Pattern Examples:"
+    echo "  --filter ERROR                    Match lines containing 'ERROR'"
+    echo "  --filter '\"error\"'                Match JSON logs with error field"
+    echo "  --filter '[status=500]'           Match logs where status=500"
+    echo "  --filter '[level=ERROR]'          Match logs where level=ERROR"
+    echo "  --grep \"connection timeout\"       Simple text search"
+    echo ""
+    echo "Examples:"
+    echo "  ecs-tail pump-prd backend-api"
+    echo "  ecs-tail pump-prd backend-api --since 1h"
+    echo "  ecs-tail pump-prd backend-api --filter ERROR"
+    echo "  ecs-tail pump-prd backend-api --grep \"database error\""
+    echo "  ecs-tail pump-prd backend-api --no-follow --since 30m --format json"
+    echo "  ecs-tail pump-prd backend-api --filter '[status>=400]' --since 5m"
+    exit 1
+fi
+
+PROFILE=$1
+SERVICE_NAME=$2
+shift 2
+
+# Default options
+SINCE="10m"
+FOLLOW=true
+FILTER_PATTERN=""
+GREP_PATTERN=""
+FORMAT="detailed"
+
+# Parse options
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --since)
+            SINCE="$2"
+            shift 2
+            ;;
+        --follow)
+            FOLLOW=true
+            shift
+            ;;
+        --no-follow)
+            FOLLOW=false
+            shift
+            ;;
+        --filter)
+            FILTER_PATTERN="$2"
+            shift 2
+            ;;
+        --grep)
+            GREP_PATTERN="$2"
+            shift 2
+            ;;
+        --format)
+            FORMAT="$2"
+            shift 2
+            ;;
+        *)
+            echo -e "${RED}Unknown option: $1${NC}"
+            exit 1
+            ;;
+    esac
+done
+
+REGION=$(aws configure get region --profile "$PROFILE" || echo "us-east-1")
+
+# Check if user is logged in via SSO
+echo -e "${CYAN}Checking AWS SSO login status...${NC}"
+if ! aws sts get-caller-identity --profile "$PROFILE" &>/dev/null; then
+    echo -e "${YELLOW}Not logged in. Initiating SSO login...${NC}"
+    aws sso login --profile "$PROFILE"
+
+    # Verify login succeeded
+    if ! aws sts get-caller-identity --profile "$PROFILE" &>/dev/null; then
+        echo -e "${RED}SSO login failed. Exiting.${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}SSO login successful!${NC}\n"
+else
+    echo -e "${GREEN}Already logged in.${NC}\n"
+fi
+
+echo -e "${CYAN}Finding ECS service...${NC}"
+
+# Find the cluster containing the service
+clusters=$(aws ecs list-clusters --profile "$PROFILE" --region "$REGION" 2>/dev/null | jq -r '.clusterArns[]' | awk -F'/' '{print $NF}')
+
+CLUSTER=""
+for cluster in $clusters; do
+    services=$(aws ecs list-services --cluster "$cluster" --profile "$PROFILE" --region "$REGION" 2>/dev/null | jq -r '.serviceArns[]' | awk -F'/' '{print $NF}')
+
+    for service in $services; do
+        if [ "$service" = "$SERVICE_NAME" ]; then
+            CLUSTER="$cluster"
+            break 2
+        fi
+    done
+done
+
+if [ -z "$CLUSTER" ]; then
+    echo -e "${RED}Service '${SERVICE_NAME}' not found in any cluster${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}Found service '${SERVICE_NAME}' in cluster '${CLUSTER}'${NC}\n"
+
+# Get the service details to find the log configuration
+echo -e "${CYAN}Getting log configuration...${NC}"
+service_info=$(aws ecs describe-services --cluster "$CLUSTER" --services "$SERVICE_NAME" --profile "$PROFILE" --region "$REGION" 2>/dev/null)
+
+# Get the task definition
+task_def_arn=$(echo "$service_info" | jq -r '.services[0].taskDefinition')
+task_def=$(aws ecs describe-task-definition --task-definition "$task_def_arn" --profile "$PROFILE" --region "$REGION" 2>/dev/null)
+
+# Extract log group from the first container
+log_group=$(echo "$task_def" | jq -r '.taskDefinition.containerDefinitions[0].logConfiguration.options["awslogs-group"] // empty')
+
+if [ -z "$log_group" ]; then
+    echo -e "${RED}No CloudWatch log group found for service '${SERVICE_NAME}'${NC}"
+    echo -e "${YELLOW}Make sure the service is configured to use awslogs driver${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}Log group: ${log_group}${NC}\n"
+
+# Convert duration to seconds for --start-time
+case "$SINCE" in
+    *s) SECONDS=${SINCE%s} ;;
+    *m) SECONDS=$((${SINCE%m} * 60)) ;;
+    *h) SECONDS=$((${SINCE%h} * 3600)) ;;
+    *d) SECONDS=$((${SINCE%d} * 86400)) ;;
+    *)
+        echo -e "${RED}Invalid duration format. Use: 1s, 30m, 1h, 1d${NC}"
+        exit 1
+        ;;
+esac
+
+START_TIME=$(($(date +%s) - SECONDS))
+START_TIME_MS=$((START_TIME * 1000))
+
+# Build the aws logs tail command
+TAIL_CMD="aws logs tail \"$log_group\" --profile \"$PROFILE\" --region \"$REGION\" --since ${SINCE}"
+
+if [ "$FOLLOW" = true ]; then
+    TAIL_CMD="$TAIL_CMD --follow"
+fi
+
+# Add format option
+case "$FORMAT" in
+    short)
+        TAIL_CMD="$TAIL_CMD --format short"
+        ;;
+    detailed)
+        TAIL_CMD="$TAIL_CMD --format detailed"
+        ;;
+    json)
+        TAIL_CMD="$TAIL_CMD --format json"
+        ;;
+    *)
+        echo -e "${RED}Invalid format. Use: short, detailed, or json${NC}"
+        exit 1
+        ;;
+esac
+
+if [ -n "$FILTER_PATTERN" ]; then
+    TAIL_CMD="$TAIL_CMD --filter-pattern \"$FILTER_PATTERN\""
+fi
+
+echo -e "${BOLD}${CYAN}Tailing logs for ${SERVICE_NAME}...${NC}"
+echo -e "${GRAY}Profile: ${PROFILE} | Region: ${REGION} | Since: ${SINCE} | Format: ${FORMAT}${NC}"
+if [ -n "$FILTER_PATTERN" ]; then
+    echo -e "${GRAY}CloudWatch Filter: ${FILTER_PATTERN}${NC}"
+fi
+if [ -n "$GREP_PATTERN" ]; then
+    echo -e "${GRAY}Grep Filter: ${GREP_PATTERN}${NC}"
+fi
+echo -e "${GRAY}Press Ctrl+C to exit${NC}\n"
+echo -e "${GRAY}────────────────────────────────────────────────────────────────${NC}\n"
+
+# Execute the tail command with optional grep
+if [ -n "$GREP_PATTERN" ]; then
+    eval "$TAIL_CMD" | grep -i --line-buffered --color=auto "$GREP_PATTERN"
+else
+    eval "$TAIL_CMD"
+fi

@@ -1,199 +1,200 @@
 #!/usr/bin/env bash
 
 if [[ $# -lt 1 ]]; then
-    echo "Usage: tuna <aws-profile>" >&2
-    return 1
+  echo "Usage: tuna <aws-profile>" >&2
+  exit 1
 fi
 
-local aws_profile="$1"
+aws_profile="$1"
 
-(
-    set -euo pipefail
-    set +x # Disable debug mode to prevent command echoing
+set -euo pipefail
+set +x # Disable debug mode to prevent command echoing
 
-    ########################
-    # COLORS
-    ########################
-    local NC="\033[0m"
-    local BOLD="\033[1m"
-    local DIM="\033[2m"
-    local RED="\033[31m"
-    local YELLOW="\033[33m"
-    local GREEN="\033[32m"
-    local CYAN="\033[36m"
+########################
+# COLORS
+########################
+NC="\033[0m"
+BOLD="\033[1m"
+DIM="\033[2m"
+RED="\033[31m"
+YELLOW="\033[33m"
+GREEN="\033[32m"
+CYAN="\033[36m"
 
-    ########################
-    # CONFIG
-    ########################
-    local AWS_PROFILE="$aws_profile" # used for aws --profile
-    local SSH_HOST="$aws_profile"    # ssh <profile>, must exist in ~/.ssh/config
-    local AWS_REGION="${TUNA_AWS_REGION:-us-east-1}"
-    local LOCAL_PORT="${TUNA_LOCAL_PORT:-8833}" # must match Port in ssh config
+########################
+# CONFIG
+########################
+AWS_PROFILE="$aws_profile" # used for aws --profile
+SSH_HOST="$aws_profile"    # ssh <profile>, must exist in ~/.ssh/config
+AWS_REGION="${TUNA_AWS_REGION:-us-east-1}"
+LOCAL_PORT="${TUNA_LOCAL_PORT:-8833}" # must match Port in ssh config
 
-    ########################
-    # STATE
-    ########################
-    local INSTANCE_ID=""
-    local TUNNEL_PID=""
-    local SSH_PID=""
-    local EXIT_REQUESTED=0
+########################
+# STATE
+########################
+INSTANCE_ID=""
+TUNNEL_PID=""
+SSH_PID=""
+EXIT_REQUESTED=0
 
-    local TOTAL_SECONDS=0
-    local TOTAL_SESSIONS=0
+TOTAL_SECONDS=0
+TOTAL_SESSIONS=0
 
-    ########################
-    # HELPERS
-    ########################
+########################
+# HELPERS
+########################
 
-    ensure_sso() {
-        if ! aws sts get-caller-identity --profile "$AWS_PROFILE" >/dev/null 2>&1; then
-            echo -e "${CYAN}[*] No valid AWS SSO session for profile '$AWS_PROFILE'. Logging in...${NC}"
-            aws sso login --profile "$AWS_PROFILE"
-        else
-            echo -e "${CYAN}[*] AWS SSO session is valid for '$AWS_PROFILE'.${NC}"
-        fi
-    }
+ensure_sso() {
+  if ! aws sts get-caller-identity --profile "$AWS_PROFILE" >/dev/null 2>&1; then
+    echo -e "${CYAN}[*] No valid AWS SSO session for profile '$AWS_PROFILE'. Logging in...${NC}"
+    aws sso login --profile "$AWS_PROFILE"
+  else
+    echo -e "${CYAN}[*] AWS SSO session is valid for '$AWS_PROFILE'.${NC}"
+  fi
+}
 
-    get_instance_id() {
-        # Find running instance whose Name tag contains "bastion" or "basction"
-        local ids
-        ids=$(aws ec2 describe-instances \
-            --profile "$AWS_PROFILE" \
-            --region "$AWS_REGION" \
-            --filters \
-            "Name=tag:Name,Values=*bastion*,*basction*" \
-            "Name=instance-state-name,Values=running" \
-            --query "Reservations[].Instances[].InstanceId" \
-            --output text || true)
+get_instance_id() {
+  # Find running instance whose Name tag contains "bastion" or "basction"
+  local ids
+  ids=$(aws ec2 describe-instances \
+    --profile "$AWS_PROFILE" \
+    --region "$AWS_REGION" \
+    --filters \
+    "Name=tag:Name,Values=*bastion*,*basction*" \
+    "Name=instance-state-name,Values=running" \
+    --query "Reservations[].Instances[].InstanceId" \
+    --output text || true)
 
-        if [[ -z "$ids" ]]; then
-            echo -e "${RED}[-] No running bastion instance found (tag Name contains 'bastion'/'basction').${NC}" >&2
-            exit 1
-        fi
+  if [[ -z "$ids" ]]; then
+    echo -e "${RED}[-] No running bastion instance found (tag Name contains 'bastion'/'basction').${NC}" >&2
+    exit 1
+  fi
 
-        INSTANCE_ID=$(awk '{print $1}' <<<"$ids")
-        echo -e "${CYAN}[*] Using bastion instance: ${BOLD}$INSTANCE_ID${NC}"
-    }
+  INSTANCE_ID=$(awk '{print $1}' <<<"$ids")
+  echo -e "${CYAN}[*] Using bastion instance: ${BOLD}$INSTANCE_ID${NC}"
+}
 
-    start_tunnel() {
-        echo -e "${CYAN}[*] Opening EC2 Instance Connect tunnel on local port ${BOLD}$LOCAL_PORT${NC}..."
+start_tunnel() {
+  echo -e "${CYAN}[*] Opening EC2 Instance Connect tunnel on local port ${BOLD}$LOCAL_PORT${NC}..."
 
-        aws ec2-instance-connect open-tunnel \
-            --instance-id "$INSTANCE_ID" \
-            --local-port "$LOCAL_PORT" \
-            --region "$AWS_REGION" \
-            --profile "$AWS_PROFILE" &
-        TUNNEL_PID=$!
+  aws ec2-instance-connect open-tunnel \
+    --instance-id "$INSTANCE_ID" \
+    --local-port "$LOCAL_PORT" \
+    --region "$AWS_REGION" \
+    --profile "$AWS_PROFILE" &
+  TUNNEL_PID=$!
 
-        # Give the tunnel a moment to come up
-        sleep 2
-        echo -e "${DIM}[*] Tunnel PID: $TUNNEL_PID${NC}"
-    }
+  # Give the tunnel a moment to come up
+  sleep 2
+  echo -e "${DIM}[*] Tunnel PID: $TUNNEL_PID${NC}"
+}
 
-    start_ssh() {
-        echo -e "${CYAN}[*] Starting SSH port-forward via host '${BOLD}$SSH_HOST${CYAN}'...${NC}"
-        # -N = no remote command, just forwarding; config provides LocalForward/Port/etc
-        ssh -N "$SSH_HOST" &
-        SSH_PID=$!
-        sleep 2
-        echo -e "${DIM}[*] SSH PID: $SSH_PID${NC}"
-    }
+start_ssh() {
+  echo -e "${CYAN}[*] Starting SSH port-forward via host '${BOLD}$SSH_HOST${CYAN}'...${NC}"
+  # -N = no remote command, just forwarding; config provides LocalForward/Port/etc
+  ssh -N "$SSH_HOST" &
+  SSH_PID=$!
+  sleep 2
+  echo -e "${DIM}[*] SSH PID: $SSH_PID${NC}"
+}
 
-    stop_procs() {
-        if [[ -n "${SSH_PID:-}" ]] && kill -0 "$SSH_PID" 2>/dev/null; then
-            echo -e "${CYAN}[*] Stopping SSH (pid $SSH_PID)...${NC}"
-            kill "$SSH_PID" 2>/dev/null || true
-            wait "$SSH_PID" 2>/dev/null || true
-        fi
-        SSH_PID=""
+stop_procs() {
+  if [[ -n "${SSH_PID:-}" ]] && kill -0 "$SSH_PID" 2>/dev/null; then
+    echo -e "${CYAN}[*] Stopping SSH (pid $SSH_PID)...${NC}"
+    kill "$SSH_PID" 2>/dev/null || true
+    wait "$SSH_PID" 2>/dev/null || true
+  fi
+  SSH_PID=""
 
-        if [[ -n "${TUNNEL_PID:-}" ]] && kill -0 "$TUNNEL_PID" 2>/dev/null; then
-            echo -e "${CYAN}[*] Stopping tunnel (pid $TUNNEL_PID)...${NC}"
-            kill "$TUNNEL_PID" 2>/dev/null || true
-            wait "$TUNNEL_PID" 2>/dev/null || true
-        fi
-        TUNNEL_PID=""
-    }
+  if [[ -n "${TUNNEL_PID:-}" ]] && kill -0 "$TUNNEL_PID" 2>/dev/null; then
+    echo -e "${CYAN}[*] Stopping tunnel (pid $TUNNEL_PID)...${NC}"
+    kill "$TUNNEL_PID" 2>/dev/null || true
+    wait "$TUNNEL_PID" 2>/dev/null || true
+  fi
+  TUNNEL_PID=""
+}
 
-    cleanup() {
-        stop_procs
-    }
+cleanup() {
+  stop_procs
+}
 
-    on_int() {
-        EXIT_REQUESTED=1
-        echo
-        echo -e "${YELLOW}[*] Ctrl+C received – stopping...${NC}"
-        stop_procs
-        # EXIT will still trigger cleanup(), but stop_procs is idempotent
-    }
+on_int() {
+  EXIT_REQUESTED=1
+  echo
+  echo -e "${YELLOW}[*] Ctrl+C received – stopping...${NC}"
+  stop_procs
+  # EXIT will still trigger cleanup(), but stop_procs is idempotent
+}
 
-    trap cleanup EXIT
-    trap on_int INT
+trap cleanup EXIT
+trap on_int INT
 
-    ########################
-    # MAIN LOOP
-    ########################
+########################
+# MAIN LOOP
+########################
 
-    ensure_sso
-    get_instance_id
+ensure_sso
+get_instance_id
 
-    while :; do
-        ensure_sso # re-check token each loop in case of very long runs
-        start_tunnel
-        start_ssh
-        TOTAL_SESSIONS=$((TOTAL_SESSIONS + 1))
+while :; do
+  ensure_sso # re-check token each loop in case of very long runs
+  start_tunnel
+  start_ssh
+  TOTAL_SESSIONS=$((TOTAL_SESSIONS + 1))
 
-        local start_ts
-        start_ts=$(date +%s)
+  start_ts=$(date +%s)
 
-        # Live single-line timer (updates in place using cursor control)
-        local printed_once=0
-        local now elapsed h m s color
+  # Live single-line timer (updates in place using cursor control)
+  printed_once=0
+  now=0
+  elapsed=0
+  h=0
+  m=0
+  s=0
+  color=""
 
-        # Explicitly disable command tracing for clean output
-        { set +x; } 2>/dev/null
+  # Explicitly disable command tracing for clean output
+  { set +x; } 2>/dev/null
 
-        while kill -0 "$TUNNEL_PID" 2>/dev/null && kill -0 "$SSH_PID" 2>/dev/null; do
-            now=$(date +%s)
-            elapsed=$((now - start_ts))
-            h=$((elapsed / 3600))
-            m=$(((elapsed % 3600) / 60))
-            s=$((elapsed % 60))
+  while kill -0 "$TUNNEL_PID" 2>/dev/null && kill -0 "$SSH_PID" 2>/dev/null; do
+    now=$(date +%s)
+    elapsed=$((now - start_ts))
+    h=$((elapsed / 3600))
+    m=$(((elapsed % 3600) / 60))
+    s=$((elapsed % 60))
 
-            # Color by age: <10m green, <60m yellow, else red
-            if ((elapsed < 600)); then
-                color="$GREEN"
-            elif ((elapsed < 3600)); then
-                color="$YELLOW"
-            else
-                color="$RED"
-            fi
+    # Color by age: <10m green, <60m yellow, else red
+    if ((elapsed < 600)); then
+      color="$GREEN"
+    elif ((elapsed < 3600)); then
+      color="$YELLOW"
+    else
+      color="$RED"
+    fi
 
-            # If line was printed before, move cursor up and clear it
-            if ((printed_once)); then
-                printf "\033[A\033[2K"
-            fi
+    # If line was printed before, move cursor up and clear it
+    if ((printed_once)); then
+      printf "\033[A\033[2K"
+    fi
 
-            printf "%b[%02d:%02d:%02d] Connected - CTRL C to disconnect%b\n" \
-                "$color" "$h" "$m" "$s" "$NC"
-            printed_once=1
+    printf "%b[%02d:%02d:%02d] Connected - CTRL C to disconnect%b\n" \
+      "$color" "$h" "$m" "$s" "$NC"
+    printed_once=1
 
-            sleep 1
-            if ((EXIT_REQUESTED)); then
-                break
-            fi
-        done
+    sleep 1
+    if ((EXIT_REQUESTED)); then
+      break
+    fi
+  done
 
-        local end_ts
-        end_ts=$(date +%s)
-        TOTAL_SECONDS=$((TOTAL_SECONDS + (end_ts - start_ts)))
+  end_ts=$(date +%s)
+  TOTAL_SECONDS=$((TOTAL_SECONDS + (end_ts - start_ts)))
 
-        if ((EXIT_REQUESTED)); then
-            break
-        fi
+  if ((EXIT_REQUESTED)); then
+    break
+  fi
 
-        echo -e "${YELLOW}[*] Tunnel/SSH died (TTL or network). Reconnecting in 5 seconds... (CTRL-C to stop)${NC}"
-        stop_procs
-        sleep 5
-    done
-)
+  echo -e "${YELLOW}[*] Tunnel/SSH died (TTL or network). Reconnecting in 5 seconds... (CTRL-C to stop)${NC}"
+  stop_procs
+  sleep 5
+done
