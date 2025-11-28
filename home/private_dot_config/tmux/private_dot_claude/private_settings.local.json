@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tmux source-file:*)",
+      "Bash(echo:*)",
+      "Bash(tmux display-message:*)",
+      "Bash(defaults read:*)",
+      "Bash(tmux show-option:*)",
+      "WebSearch",
+      "Bash(cat:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
