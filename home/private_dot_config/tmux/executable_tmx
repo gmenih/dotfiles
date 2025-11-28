@@ -1,0 +1,33 @@
+#!/bin/zsh
+
+work_layout() {
+    # Split window horizontally: left (25%) for claude (full height), right (75%) for nvim/terminal
+    tmux split-window -h -p 75
+
+    # Currently active pane is the right one (75%)
+    # Split it vertically: top (70%) for nvim, bottom (30%) for terminal
+    tmux split-window -v -p 30
+
+    # Now active pane is bottom-right (terminal)
+    # Navigate up to top-right and start nvim
+    tmux select-pane -U
+    tmux send-keys "nvim ." C-m
+
+    # Navigate left to the left pane and start claude
+    tmux select-pane -L
+    tmux send-keys "claude" C-m
+}
+
+# Main command dispatcher
+case "$1" in
+    work)
+        work_layout
+        ;;
+    *)
+        echo "Usage: tmx <command>"
+        echo ""
+        echo "Commands:"
+        echo "  work    Setup work layout (claude | nvim/terminal)"
+        exit 1
+        ;;
+esac
