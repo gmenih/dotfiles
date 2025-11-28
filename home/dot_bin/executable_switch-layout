@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set +x
+
+current=$(keyboardSwitcher get)
+target="Slovenian"
+
+echo "CURRENT: $current, target: $target"
+
+if [[ "$current" = "Slovenian" ]]; then
+  target="U.S."
+fi
+
+keyboardSwitcher select "$target"
