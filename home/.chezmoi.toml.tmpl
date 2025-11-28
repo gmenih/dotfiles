@@ -4,6 +4,7 @@
 {{ $npmToken := onepasswordRead "op://Personal/npm_token/token" }} 
 {{ $openAiKey := onepasswordRead "op://Personal/open_ai/key" }}
 {{ $anthropicApiKey := onepasswordRead "op://Personal/Anthropic_API/key" }}
+{{ $anthropicWorkApiKey := onepasswordRead "op://Personal/Povio_Anthropic_API/api_key" }}
 {{ $geminiApiKey := onepasswordRead "op://Personal/Gemini_API/key"}}
 
 encryption = "age"
@@ -24,5 +25,6 @@ encryption = "age"
 
     npmToken = {{ $npmToken | quote }}
     anthropicApiKey = {{ $anthropicApiKey | quote }}
+    anthropicWorkApiKey = {{ $anthropicWorkApiKey | quote }}
     openAiKey = {{ $openAiKey | quote }}
     geminiApiKey = {{ $geminiApiKey | quote }}
