@@ -13,3 +13,6 @@ alias gll='git pull'
 alias gcd='git checkout $(git_develop_branch) && git pull'
 alias gcm='git checkout $(git_main_branch) && git pull'
 alias gcane="git commit --amend --no-edit"
+
+alias gwa='git worktree add'
+alias gwr='git worktree remove'
