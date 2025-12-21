@@ -10,6 +10,9 @@ aws_profile="$1"
 set -euo pipefail
 set +x # Disable debug mode to prevent command echoing
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/aws-sso-lib"
+
 ########################
 # COLORS
 ########################
@@ -43,15 +46,6 @@ TOTAL_SESSIONS=0
 ########################
 # HELPERS
 ########################
-
-ensure_sso() {
-  if ! aws sts get-caller-identity --profile "$AWS_PROFILE" >/dev/null 2>&1; then
-    echo -e "${CYAN}[*] No valid AWS SSO session for profile '$AWS_PROFILE'. Logging in...${NC}"
-    aws sso login --profile "$AWS_PROFILE"
-  else
-    echo -e "${CYAN}[*] AWS SSO session is valid for '$AWS_PROFILE'.${NC}"
-  fi
-}
 
 get_instance_id() {
   # Find running instance whose Name tag contains "bastion" or "basction"
@@ -133,11 +127,11 @@ trap on_int INT
 # MAIN LOOP
 ########################
 
-ensure_sso
+ensure_sso "$AWS_PROFILE"
 get_instance_id
 
 while :; do
-  ensure_sso # re-check token each loop in case of very long runs
+  ensure_sso "$AWS_PROFILE" # re-check token each loop in case of very long runs
   start_tunnel
   start_ssh
   TOTAL_SESSIONS=$((TOTAL_SESSIONS + 1))

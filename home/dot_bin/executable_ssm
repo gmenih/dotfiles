@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/aws-sso-lib"
+
+usage() {
+  cat >&2 <<EOF
+Usage:
+  ssm <profile> get <path>            Read a parameter
+  ssm <profile> write <path> <value>  Write a SecureString parameter
+  ssm <profile> list [path]           List parameters (optionally by path)
+
+Parameters are auto-prefixed with /<profile>/
+
+Examples:
+  ssm pump-stg get zendesk/username        -> /${profile}/zendesk/username
+  ssm pump-stg write zendesk/token "xxx"   -> /${profile}/zendesk/token
+  ssm pump-stg list                        -> /${profile}/
+  ssm pump-stg list zendesk                -> /${profile}/zendesk
+EOF
+  exit 1
+}
+
+if [[ $# -lt 2 ]]; then
+  usage
+fi
+
+profile="$1"
+shift
+
+ensure_sso "$profile"
+
+case "$1" in
+  get)
+    if [[ $# -lt 2 ]]; then
+      echo "Error: get requires a parameter path" >&2
+      exit 1
+    fi
+    aws ssm get-parameter \
+      --profile "$profile" \
+      --name "/${profile}/${2}" \
+      --with-decryption \
+      --query "Parameter.Value" \
+      --output text
+    ;;
+  write)
+    if [[ $# -lt 3 ]]; then
+      echo "Error: write requires a parameter path and value" >&2
+      exit 1
+    fi
+    aws ssm put-parameter \
+      --profile "$profile" \
+      --name "/${profile}/${2}" \
+      --value "$3" \
+      --type SecureString \
+      --overwrite \
+      --output text
+    echo "/${profile}/${2} written"
+    ;;
+  list)
+    path_prefix="/${profile}/${2:-}"
+    aws ssm get-parameters-by-path \
+      --profile "$profile" \
+      --path "$path_prefix" \
+      --recursive \
+      --query "Parameters[].Name" \
+      --output text | tr '\t' '\n' | sort
+    ;;
+  *)
+    echo "Unknown command: $1" >&2
+    usage
+    ;;
+esac

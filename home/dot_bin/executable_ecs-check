@@ -9,6 +9,9 @@ if [ -z "$BASH_VERSION" ] || [ "${BASH_VERSION%%.*}" -lt 4 ]; then
     exit 1
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/aws-sso-lib"
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -41,21 +44,7 @@ PROFILE=$1
 SERVICE_FILTER=${2:-""}
 REGION=$(aws configure get region --profile "$PROFILE" || echo "us-east-1")
 
-# Check if user is logged in via SSO
-echo -e "${CYAN}Checking AWS SSO login status...${NC}"
-if ! aws sts get-caller-identity --profile "$PROFILE" &>/dev/null; then
-    echo -e "${YELLOW}Not logged in. Initiating SSO login...${NC}"
-    aws sso login --profile "$PROFILE"
-
-    # Verify login succeeded
-    if ! aws sts get-caller-identity --profile "$PROFILE" &>/dev/null; then
-        echo -e "${RED}SSO login failed. Exiting.${NC}"
-        exit 1
-    fi
-    echo -e "${GREEN}SSO login successful!${NC}\n"
-else
-    echo -e "${GREEN}Already logged in.${NC}\n"
-fi
+ensure_sso "$PROFILE"
 
 # Function to match service name (fuzzy)
 match_service() {

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Shared AWS SSO helper functions - source this file, don't execute it
+
+# Colors (only set if not already defined)
+: "${NC:=\033[0m}"
+: "${CYAN:=\033[36m}"
+: "${GREEN:=\033[32m}"
+: "${YELLOW:=\033[33m}"
+: "${RED:=\033[31m}"
+
+ensure_sso() {
+  local profile="$1"
+
+  if [[ -z "$profile" ]]; then
+    echo -e "${RED}ensure_sso: profile argument required${NC}" >&2
+    return 1
+  fi
+
+  if ! aws sts get-caller-identity --profile "$profile" &>/dev/null; then
+    echo -e "${YELLOW}Not logged in. Initiating SSO login...${NC}" >&2
+    aws sso login --profile "$profile"
+
+    if ! aws sts get-caller-identity --profile "$profile" &>/dev/null; then
+      echo -e "${RED}SSO login failed.${NC}" >&2
+      return 1
+    fi
+    echo -e "${GREEN}SSO login successful!${NC}" >&2
+  fi
+}
