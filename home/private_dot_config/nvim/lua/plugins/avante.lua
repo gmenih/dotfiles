@@ -6,13 +6,13 @@ return {
   opts = {
     -- provider = "gemini",
     instructions_files = "CLAUDE.md",
-    provider = "claude",
+    provider = "claude-code",
     providers = {
       gemini = {
         model = "gemini-2.5-pro-exp-03-25",
       },
       claude = {
-        model = "claude-3-7-sonnet-latest",
+        auth_type = "max",
       },
     },
     auto_suggestions_provider = "claude",

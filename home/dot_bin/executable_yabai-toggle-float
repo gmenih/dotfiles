@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Toggle float for the focused window
+# If the window becomes floating, center it on screen
+
+# Get current float state before toggle
+is_floating=$(yabai -m query --windows --window | jq -r '."is-floating"')
+
+# Toggle float
+yabai -m window --toggle float
+
+# If window was NOT floating (and now IS floating), center it
+if [[ "$is_floating" == "false" ]]; then
+    yabai -m window --grid 4:4:1:1:2:2
+fi

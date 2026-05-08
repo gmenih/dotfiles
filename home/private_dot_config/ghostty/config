@@ -1,0 +1,5 @@
+font-family="FiraCode Nerd Font"
+
+macos-titlebar-style = transparent
+
+theme=light:Catppuccin Latte,dark:Catppuccin Mocha

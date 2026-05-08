@@ -8,8 +8,8 @@ source "$SCRIPT_DIR/aws-sso-lib"
 usage() {
   cat >&2 <<EOF
 Usage:
-  ssm <profile> get <path>            Read a parameter
-  ssm <profile> write <path> <value>  Write a SecureString parameter
+  ssm <profile> get|read <path>            Read a parameter
+  ssm <profile> set|write <path> <value>  Write a SecureString parameter
   ssm <profile> list [path]           List parameters (optionally by path)
 
 Parameters are auto-prefixed with /<profile>/
@@ -33,7 +33,7 @@ shift
 ensure_sso "$profile"
 
 case "$1" in
-  get)
+  get|read)
     if [[ $# -lt 2 ]]; then
       echo "Error: get requires a parameter path" >&2
       exit 1
@@ -45,7 +45,7 @@ case "$1" in
       --query "Parameter.Value" \
       --output text
     ;;
-  write)
+  write|set)
     if [[ $# -lt 3 ]]; then
       echo "Error: write requires a parameter path and value" >&2
       exit 1

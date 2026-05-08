@@ -272,6 +272,9 @@ while true; do
                         task_def_arn=$(echo "$task" | jq -r '.taskDefinitionArn')
                         task_revision=$(echo "$task_def_arn" | awk -F':' '{print $NF}')
 
+                        task_image=$(echo "$task" | jq -r '.containers[0].image // empty')
+                        task_image_short="${task_image##*/}"
+
                         task_key="${service_key}:${task_id}"
                         NEW_TASKS[$task_key]=1
 
@@ -285,9 +288,9 @@ while true; do
 
                         if [ -n "$task_started" ]; then
                             uptime=$(calculate_uptime "$task_started")
-                            OUTPUT_BUFFER+="      ${icon} ${CYAN}#${task_revision}${NC} ${GRAY}${uptime}${NC} ${task_id:0:12}${task_marker}\n"
+                            OUTPUT_BUFFER+="      ${icon} ${CYAN}#${task_revision}${NC} ${GRAY}${uptime}${NC} ${task_image_short:-unknown}${task_marker}\n"
                         else
-                            OUTPUT_BUFFER+="      ${icon} ${CYAN}#${task_revision}${NC} ${GRAY}---${NC}     ${task_id:0:12}${task_marker}\n"
+                            OUTPUT_BUFFER+="      ${icon} ${CYAN}#${task_revision}${NC} ${GRAY}---${NC}     ${task_image_short:-unknown}${task_marker}\n"
                         fi
                     done <<<"$task_details"
                 else

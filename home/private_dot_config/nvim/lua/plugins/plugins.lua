@@ -53,6 +53,9 @@ return {
   -- Bufferline BL binding
   {
     "akinsho/bufferline.nvim",
+    options = {
+      always_show_bufferline = true,
+    },
     keys = {
       {
         "<leader>bl",
