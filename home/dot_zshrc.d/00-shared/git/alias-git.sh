@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-alias gpf='ggsup && gp -f'
+alias gpf='ggsup && gp --force-with-lease'
 alias gcane="git commit --amend --no-edit"
 alias grom='git rebase origin/$(git_main_branch)'
 alias ghom='git reset --hard origin/$(git_main_branch)'

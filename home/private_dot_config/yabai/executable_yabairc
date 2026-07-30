@@ -2,7 +2,6 @@
 
 yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
 sudo yabai --load-sa
-
 yabai -m config mouse_follows_focus off
 yabai -m config focus_follows_mouse off
 yabai -m config window_origin_display default
@@ -29,3 +28,6 @@ yabai -m rule --add app="^System Settings$" manage=off
 yabai -m rule --add title="^Select a certificate$" manage=off
 yabai -m rule --add app="^Spotify$" manage=off
 yabai -m rule --add app="^Finder$" manage=off
+yabai -m rule --add app="^DBeaver Community$" manage=off
+yabai -m rule --add app="^DBeaver Community$" title="^DBeaver " manage=on
+yabai -m rule --add app="^Messages$" manage=off

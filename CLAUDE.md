@@ -68,7 +68,7 @@ The `.chezmoiignore.tmpl` file excludes platform-specific directories based on O
 
 ### Secret Management
 
-Secrets are loaded via 1Password CLI (`onepasswordRead`) in `.chezmoi.toml.tmpl` and made available to templates as variables like `.npmToken`, `.anthropicApiKey`, `.openAiKey`, `.geminiApiKey`.
+No secrets are currently loaded - AI/API keys were deliberately removed from the environment (2026-07). If a secret is ever needed again, load it via 1Password CLI (`onepasswordRead`) in `.chezmoi.toml.tmpl` and expose it to templates as a `[data]` variable; never hardcode values in templates.
 
 ## Important Notes
 

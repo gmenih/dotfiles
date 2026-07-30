@@ -134,32 +134,53 @@ get_deployment_status() {
     fi
 }
 
-# Function to save cursor position
-save_cursor() {
-    echo -ne "\033[s"
+# Alternate screen buffer, hidden cursor, no line wrapping (long lines are
+# truncated by the terminal instead of pushing everything below them down)
+enter_screen() {
+    echo -ne "\033[?1049h\033[?25l\033[?7l"
+    clear
 }
 
-# Function to restore cursor position
-restore_cursor() {
-    echo -ne "\033[u"
+leave_screen() {
+    echo -ne "\033[?7h\033[?25h\033[?1049l"
 }
 
-# Function to move cursor to line
-goto_line() {
-    local line=$1
-    echo -ne "\033[${line};0H"
+trap 'leave_screen; exit 0' EXIT INT TERM
+
+# Draw a frame from the top-left, clearing each line as we go and wiping
+# whatever the previous (taller) frame left below us
+render_frame() {
+    local frame
+    frame=$(echo -e "$1")
+
+    # tput reports the static terminfo size (24) when its stdout is a pipe,
+    # so ask the tty directly
+    local rows cols
+    read -r rows cols < <(stty size </dev/tty 2>/dev/null) || true
+    [ -n "$rows" ] || rows=${LINES:-24}
+
+    local out=$'\033[H'
+    local count=0
+    local truncated=false
+    while IFS= read -r line; do
+        if [ "$count" -ge $((rows - 1)) ]; then
+            truncated=true
+            break
+        fi
+        out+="${line}"$'\033[K\n'
+        count=$((count + 1))
+    done <<<"$frame"
+
+    if [ "$truncated" = true ]; then
+        out+=$'\033[0;90m... output truncated (terminal too short)\033[0m\033[K'
+    fi
+    out+=$'\033[J'
+
+    printf '%s' "$out"
 }
 
-# Function to clear from cursor to end of line
-clear_line() {
-    echo -ne "\033[K"
-}
-
-# Function to render content to buffer
-render_to_buffer() {
-    local content="$1"
-    echo -e "$content"
-}
+enter_screen
+render_frame "${BOLD}${CYAN}ECS Status Monitor${NC}\n\n  ${GRAY}fetching from ${PROFILE}...${NC}"
 
 # Main loop
 while true; do
@@ -311,17 +332,8 @@ while true; do
 
     OUTPUT_BUFFER+="\n${GRAY}Press Ctrl+C to exit | Refresh: 5s${NC}\n"
 
-    # Clear screen only on first run
-    if [ "$FIRST_RUN" = true ]; then
-        clear
-        FIRST_RUN=false
-    else
-        # Move cursor to top
-        tput cup 0 0
-    fi
-
-    # Render output
-    echo -e "$OUTPUT_BUFFER"
+    render_frame "$OUTPUT_BUFFER"
+    FIRST_RUN=false
 
     # Update known state
     KNOWN_CLUSTERS=()

@@ -1,5 +1,27 @@
 return {
   {
+    "hat0uma/csvview.nvim",
+    ---@module "csvview"
+    ---@type CsvView.Options
+    opts = {
+      parser = { comments = { "#", "//" } },
+      keymaps = {
+        -- Text objects for selecting fields
+        textobject_field_inner = { "if", mode = { "o", "x" } },
+        textobject_field_outer = { "af", mode = { "o", "x" } },
+        -- Excel-like navigation:
+        -- Use <Tab> and <S-Tab> to move horizontally between fields.
+        -- Use <Enter> and <S-Enter> to move vertically between rows and place the cursor at the end of the field.
+        -- Note: In terminals, you may need to enable CSI-u mode to use <S-Tab> and <S-Enter>.
+        jump_next_field_end = { "<Tab>", mode = { "n", "v" } },
+        jump_prev_field_end = { "<S-Tab>", mode = { "n", "v" } },
+        jump_next_row = { "<Enter>", mode = { "n", "v" } },
+        jump_prev_row = { "<S-Enter>", mode = { "n", "v" } },
+      },
+    },
+    cmd = { "CsvViewEnable", "CsvViewDisable", "CsvViewToggle" },
+  },
+  {
     "hrsh7th/nvim-cmp",
     ---@param opts cmp.ConfigSchema
     opts = function(_, opts)
@@ -86,9 +108,12 @@ return {
       end,
     },
   },
-  -- Tmux Navigator
+  -- Tmux + herdr Navigator
+  -- <c-h/j/k/l> come from vim-herdr-navigation, which crosses into herdr panes
+  -- at a split edge and falls back to TmuxNavigate* when running under tmux.
   {
     "christoomey/vim-tmux-navigator",
+    lazy = false,
     cmd = {
       "TmuxNavigateLeft",
       "TmuxNavigateDown",
@@ -97,14 +122,33 @@ return {
       "TmuxNavigatePrevious",
     },
     keys = {
-      { "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
-      { "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
-      { "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
-      { "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
       { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
     },
+    init = function()
+      vim.g.tmux_navigator_no_mappings = 1
+    end,
+    -- <C-h/j/k/l> are mapped in lua/config/keymaps.lua so they load after
+    -- LazyVim's VeryLazy window keymaps instead of being overwritten by them.
   },
   { "folke/todo-comments.nvim" },
+
+  -- Free up <leader>n so it is a pure prefix for <leader>ng (Neogit) with no
+  -- timeoutlen race against LazyVim's notification history mapping.
+  {
+    "folke/snacks.nvim",
+    -- stylua: ignore
+    keys = {
+      { "<leader>n", false },
+      { "<leader>N", function()
+        if Snacks.config.picker and Snacks.config.picker.enabled then
+          Snacks.picker.notifications()
+        else
+          Snacks.notifier.show_history()
+        end
+      end, desc = "Notification History" },
+    },
+  },
+
   -- Neogit
   {
     "NeogitOrg/neogit",

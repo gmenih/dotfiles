@@ -1,12 +1,6 @@
 {{ $isMac := eq .chezmoi.os "darwin" }}
 {{ $isArch := and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "arch") }}
 
-{{ $npmToken := onepasswordRead "op://Personal/npm_token/token" }} 
-{{ $openAiKey := onepasswordRead "op://Personal/open_ai/key" }}
-{{ $anthropicApiKey := onepasswordRead "op://Personal/Anthropic_API/key" }}
-{{ $anthropicWorkApiKey := onepasswordRead "op://Personal/Povio_Anthropic_API/api_key" }}
-{{ $geminiApiKey := onepasswordRead "op://Personal/Gemini_API/key"}}
-
 encryption = "age"
 [age]
     identity="{{ .chezmoi.homeDir }}/.config/age-key.txt"
@@ -22,9 +16,3 @@ encryption = "age"
     homeDir = {{ .chezmoi.homeDir | quote }}
     isArch = {{ $isArch }}
     isMac = {{ $isMac }}
-
-    npmToken = {{ $npmToken | quote }}
-    anthropicApiKey = {{ $anthropicApiKey | quote }}
-    anthropicWorkApiKey = {{ $anthropicWorkApiKey | quote }}
-    openAiKey = {{ $openAiKey | quote }}
-    geminiApiKey = {{ $geminiApiKey | quote }}
