@@ -34,6 +34,7 @@ Projects use different package managers (npm, pnpm, yarn). NEVER assume - check 
 - Subject: imperative mood, lowercase, no trailing period, max 72 chars. Never vague subjects like "updates", "changes", "wip".
 - Add a body only when the why is not obvious from the diff.
 - Claude may commit WITHOUT asking only in the dotfiles repo (`~/.local/share/chezmoi`). In every other repo: never commit unless explicitly asked, every time.
+- Exception: an agent running `/jira-implement` inside an mn task worktree commits on that task branch as part of the job - never on main or staging, and pushing/PRs still require a yes.
 
 # Writing rules
 
