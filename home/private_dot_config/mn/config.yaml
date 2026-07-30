@@ -1,0 +1,35 @@
+# mn global configuration. Everything is optional — delete a key and
+# the built-in default applies. mn never reads config from your repos;
+# per-repo overrides live next to this file under repos/ (open them
+# with `mn config` from inside the repo).
+
+# Where task worktrees are created. Unset (default): a sibling of the
+# repo — working in ~/projects/pump-api, task "x" lands in
+# ~/projects/pump-api.trees/x. Set a path to centralize them instead:
+# worktrees_dir: ~/.local/share/mn/worktrees
+
+# Untracked files copied from the repo's main checkout into every new
+# worktree (relative to the repo root; missing entries skipped):
+copy:
+  - .env
+  - .env.local
+  - .claude
+
+# Commands run inside every freshly created worktree (once, at
+# creation, after copy), with MN_TASK / MN_REPO / MN_WORKTREE exported:
+# on_create:
+#   - direnv allow
+
+# Panes of a task window. The first pane fills the window; each later
+# pane splits the PREVIOUS one ("right" or "down"), taking size% of it.
+# Commands run in the worktree; env vars like $SHELL are expanded. A
+# command starting with "claude" gets per-task session flags appended
+# so the conversation resumes.
+layout:
+  - cmd: claude
+  - cmd: nvim .
+    split: right
+    size: 55
+  - cmd: $SHELL
+    split: down
+    size: 40
