@@ -1,52 +1,37 @@
-## dotfiles
+# dotfiles
 
-Dotfiles for my machines, managed by [Chezmoi](https://chezmoi.io).
+Dotfiles for my machines, managed by [chezmoi](https://chezmoi.io). The repo root is `home/` (via `.chezmoiroot`), which maps onto `$HOME`.
 
--   `r`: Reset
--   `C-e`: New session (prompts for name)
--   `C-d`: Set catppuccin flavour to dark
--   `C-l`: Set catppuccin flavour to light
+## New machine
 
-# Contents
+1. Restore the age identity from 1Password ("chezmoi age key (identity)") to `~/.config/age-key.txt` - encrypted files cannot decrypt without it.
+2. `chezmoi init --apply git@github.com:gmenih/dotfiles.git`
 
-The root of the `home` directory contains some common dotfiles for:
+`.chezmoiscripts` runs on init/apply and installs required packages (`brew` on macOS, `yay` on Arch) plus preferred system configs. `.chezmoiexternal.toml` pulls external dependencies like `oh-my-zsh` and its plugins.
 
--   TMUX
--   ZSH
--   NPM
--   Git
--   ASDF
+## Encryption
 
-The rest of the files are spread around different directories.
+This repo is public. Anything work-specific (everything under `.zshrc.d/work/`, work tooling in `.bin`, work-related app configs, the jira claude skills) is age-encrypted - added with `chezmoi add --encrypt`, stored as `encrypted_*.age`. The recipient lives in `.chezmoi.toml.tmpl`; the identity stays out of the repo, backed up in 1Password.
 
-## .chezmoiscripts
+## Contents
 
-`.chezmoiscripts` is a special folder that contains scripts to execute on init. These scripts will install all required packages (either with `brew` or `yay`), and set some preferred system configs.
+### `.zshrc.d`
 
-## dot_zshrc.d > .zshrc.d
+All ZSH helpers, aliases, and config, sourced by [.zshrc](home/dot_zshrc.tmpl). Split into `00-shared` (everything), `darwin` (macOS only), `arch` (Linux only), and `work` (encrypted). Sub-directories are command-gated: files in `00-shared/docker/` only source when `docker` is installed.
 
-`.zshrc.d` is a configuration directory for ZSH, where I keep all of my helper functions, aliases, and configuration files for ZSH. It includes shared scripts (in `00-shared`, prefixed with 00 for source order), scripts that I only need on macOS (in the `darwin` directory), and scripts I only need on Linux (in the `arch` directory). Each directory contains sub-directories, where the name of the directory represents a command that needs be present on the system in order for files in the directory to be sourced. E.g. `arch/git/git-alias.zsh` would only be sourced on Linux, if the `git` command is installed.
+### `.config`
 
-To see how this works, check out the [.zshrc](home/dot_zshrc.tmpl) file.
+App configs: Ghostty, [herdr](https://herdr.sh) (workspace manager), Neovim, mn (worktree/task tool, built in [monastery](https://github.com/gmenih/monastery)), atuin, starship, yabai, skhd, Karabiner, leader-key, btop, and friends.
 
-## .config
+### `.claude`
 
-This directory contains configurations for apps that I use. Currently it contains config for:
+Global instructions (`CLAUDE.md`) and skills for Claude Code. Generic skills (writing, planning, review) are plaintext; work-workflow skills are encrypted.
 
--   Neovim - this is mostly stolen from [josean](https://github.com/josean-dev/dev-environment-files)
--   [Yabai](https://github.com/koekeishiya/yabai)
--   [SKHD](https://github.com/koekeishiya/skhd)
--   Karabiner
+### `.bin`
 
-## .chezmoiexternal.toml
+Personal scripts and one-off binaries on `PATH`: AWS/ECS helpers, `tuna` (SSO tunnels), `pdb` (encrypted, work database helper), yabai utilities.
 
-This is a special Chezmoi file, which contains config for external dependencies that need to be installed, such as `oh-my-zsh`, `asdf`, and some plugins for these.
+### Other
 
-## Other
-
-Apart from that, there some less important directories, such as:
-
--   `Projects` - This is just an empty directory that I want crated, where I store my personal projects.
--   `Work` - same as above, but for work projects
--   `.bin` - contains some executable scripts, and I usuallu put extraneous binaries that I want in my `PATH` variable here.
--   `.npm-global` - a directory that is configured to hold packages installed with `npm install -g`, to avoid user permission issues
+- `Projects` / `Work` - empty directories I want created, for personal and work repos
+- `.npm-global` - global npm installs without permission pain
