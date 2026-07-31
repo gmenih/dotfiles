@@ -35,6 +35,7 @@ Projects use different package managers (npm, pnpm, yarn). NEVER assume - check 
 - Add a body only when the why is not obvious from the diff.
 - Claude may commit WITHOUT asking only in the dotfiles repo (`~/.local/share/chezmoi`) and in `~/Projects/monastery` (stewardship delegated 2026-07-30 - "take mn over"). In every other repo: never commit unless explicitly asked, every time. Pushing always requires a yes.
 - Exception: an agent running `/jira-implement` inside an mn task worktree commits on that task branch as part of the job - never on main or staging, and pushing/PRs still require a yes.
+- NEVER add a Co-Authored-By line or any other Claude attribution to commit messages.
 
 # Code style
 
