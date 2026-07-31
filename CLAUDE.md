@@ -70,6 +70,10 @@ The `.chezmoiignore.tmpl` file excludes platform-specific directories based on O
 
 No secrets are currently loaded - AI/API keys were deliberately removed from the environment (2026-07). If a secret is ever needed again, load it via 1Password CLI (`onepasswordRead`) in `.chezmoi.toml.tmpl` and expose it to templates as a `[data]` variable; never hardcode values in templates.
 
+### Work files are encrypted (this repo is PUBLIC)
+
+Anything work-specific - everything under `.zshrc.d/work/`, work tooling in `.bin` (e.g. `pdb`), per-repo mn configs for work repos - MUST be added with `chezmoi add --encrypt`, never plaintext. Age recipient lives in `.chezmoi.toml.tmpl`; the identity is `~/.config/age-key.txt` (untracked, backed up in 1Password as "chezmoi age key (identity)"). If that identity file is missing on a machine, restore it from 1Password before `chezmoi apply` - encrypted files cannot decrypt without it.
+
 ## Important Notes
 
 - When modifying install scripts in `.chezmoiscripts/`, use `chezmoi apply --force` to re-run them
