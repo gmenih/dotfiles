@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Completely disable/enable yabai by unloading/loading its LaunchAgent.
+# bootout (not kill) is required because the agent has KeepAlive.Crashed=true.
+
+LABEL="com.asmvik.yabai"
+PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
+
+if launchctl print "gui/$UID/$LABEL" &>/dev/null; then
+    launchctl bootout "gui/$UID/$LABEL"
+else
+    launchctl bootstrap "gui/$UID" "$PLIST"
+fi
