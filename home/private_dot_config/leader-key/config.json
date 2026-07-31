@@ -1,0 +1,177 @@
+{
+  "actions": [
+    {
+      "key": "t",
+      "type": "application",
+      "value": "/Applications/WezTerm.app"
+    },
+    {
+      "key": "f",
+      "label": "Toggle fullscreen",
+      "type": "command",
+      "value": "yabai -m window --toggle zoom-fullscreen"
+    },
+    {
+      "key": "1",
+      "label": "Focus 1",
+      "type": "command",
+      "value": "yabai -m space --focus 1"
+    },
+    {
+      "key": "2",
+      "label": "Focus 2",
+      "type": "command",
+      "value": "yabai -m space --focus 2"
+    },
+    {
+      "key": "3",
+      "label": "Focus 3",
+      "type": "command",
+      "value": "yabai -m space --focus 3"
+    },
+    {
+      "key": "4",
+      "label": "Focus 4",
+      "type": "command",
+      "value": "yabai -m space --focus 4"
+    },
+    {
+      "key": "5",
+      "label": "Focus 5",
+      "type": "command",
+      "value": "yabai -m space --focus 5"
+    },
+    {
+      "key": "6",
+      "label": "Focus 6",
+      "type": "command",
+      "value": "yabai -m space --focus 6"
+    },
+    {
+      "key": "7",
+      "label": "Focus 7",
+      "type": "command",
+      "value": "yabai -m space --focus 7"
+    },
+    {
+      "key": "8",
+      "label": "Focus 8",
+      "type": "command",
+      "value": "yabai -m space --focus 8"
+    },
+    {
+      "key": "9",
+      "label": "Focus 9",
+      "type": "command",
+      "value": "yabai -m space --focus 9"
+    },
+    {
+      "key": "`",
+      "label": "Disable from yabai",
+      "type": "command",
+      "value": "yabai-toggle-float"
+    },
+    {
+      "actions": [
+        {
+          "key": "g",
+          "label": "Laptop layout",
+          "type": "command",
+          "value": "yb-layout 'laptop'"
+        },
+        {
+          "key": "b",
+          "label": "Laptop layout",
+          "type": "command",
+          "value": "yb-layout 'wide'"
+        },
+        {
+          "key": "h",
+          "label": "Swap left",
+          "type": "command",
+          "value": "yabai -m window --swap west"
+        },
+        {
+          "key": "j",
+          "label": "Swap down",
+          "type": "command",
+          "value": "yabai -m window --swap south"
+        },
+        {
+          "key": "k",
+          "label": "Swap up",
+          "type": "command",
+          "value": "yabai -m window --swap north"
+        },
+        {
+          "key": "l",
+          "label": "Swap right",
+          "type": "command",
+          "value": "yabai -m window --swap east"
+        },
+        {
+          "key": "1",
+          "label": "Move to 1",
+          "type": "command",
+          "value": "yabai -m window --space 1"
+        },
+        {
+          "key": "2",
+          "label": "Move to 2",
+          "type": "command",
+          "value": "yabai -m window --space 2"
+        },
+        {
+          "key": "3",
+          "label": "Move to 3",
+          "type": "command",
+          "value": "yabai -m window --space 3"
+        },
+        {
+          "key": "4",
+          "label": "Move to 4",
+          "type": "command",
+          "value": "yabai -m window --space 4"
+        },
+        {
+          "key": "5",
+          "label": "Move to 5",
+          "type": "command",
+          "value": "yabai -m window --space 5"
+        },
+        {
+          "key": "6",
+          "label": "Move to 6",
+          "type": "command",
+          "value": "yabai -m window --space 6"
+        },
+        {
+          "key": "7",
+          "label": "Move to 7",
+          "type": "command",
+          "value": "yabai -m window --space 7"
+        },
+        {
+          "key": "8",
+          "label": "Move to 8",
+          "type": "command",
+          "value": "yabai -m window --space 8"
+        },
+        {
+          "key": "9",
+          "label": "Move to 9",
+          "type": "command",
+          "value": "yabai -m window --space 9"
+        }
+      ],
+      "key": "g",
+      "type": "group"
+    },
+    {
+      "key": "l",
+      "type": "command",
+      "value": "switch-layout"
+    }
+  ],
+  "type": "group"
+}
