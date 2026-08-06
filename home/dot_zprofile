@@ -1,0 +1,10 @@
+
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# NOTE: do not source ~/.zshrc here. zsh sources it itself for every interactive
+# shell, so doing it here makes it run twice in a login shell (which is what
+# herdr spawns) and thrashes the oh-my-zsh completion cache.
+
+# Added by OrbStack: command-line tools and integration
+# This won't be added again if you remove it.
+source ~/.orbstack/shell/init.zsh 2>/dev/null || :

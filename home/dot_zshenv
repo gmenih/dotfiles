@@ -1,0 +1,6 @@
+typeset -U path PATH
+
+# Baseline PATH for every zsh, including non-login non-interactive ones
+# (scripts, launchd, herdr plugin commands). Interactive shells get the rest
+# from ~/.zshrc.d.
+export PATH="$HOME/.bin:$HOME/.local/bin:$HOME/.npm-global/bin:$HOME/go/bin:$HOME/.asdf/shims:$HOME/.orbstack/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"

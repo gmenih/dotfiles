@@ -1,3 +1,5 @@
-export JAVA_HOME="/opt/homebrew/Cellar/openjdk/23.0.2"
-export PATH="/usr/local/opt/python@3.8/bin:$JAVA_HOME/bin:/Users/gmenih/Library/Application Support/Coursier/bin:$PATH"
-export PATH="/usr/homebrew/opt/libpq/bin:$PATH"
+export JAVA_HOME="/opt/homebrew/opt/openjdk"
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# libpq is keg-only, so its psql/pg_dump need an explicit prepend
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
