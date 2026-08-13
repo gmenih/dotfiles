@@ -54,6 +54,22 @@ When I ask a question, I EXPECT AN ANSWER! Always answer my questions first, unl
 
 # Tool rules
 
-- Always use `rg` instead of `grep`. Never call `grep` in Bash.
-- `rg` uses different flags than `grep` - namely, `-r` in `rg` is "replace", not "regex"
-- Always use `fd` instead of `find`. Never call `find` in Bash.
+`rg` instead of `grep`, `fd` instead of `find`. Both are denied in Bash, and the
+`~/.bin/claude-bash-guard` PreToolUse hook answers with the rewrite. Translate the
+flags, never carry them across verbatim:
+
+    grep -rn pat .            ->  rg -n pat        # rg recurses by DEFAULT
+    grep -r --include='*.ts'  ->  rg -g '*.ts'     # or: rg -t ts
+    cmd | grep pat            ->  cmd | rg pat
+    find . -name '*.ts'       ->  fd -e ts         # or: fd -g '*.ts'
+    find . -type d            ->  fd -t d
+    find . -maxdepth 2        ->  fd -d 2
+    find . -exec CMD {} \;    ->  fd -x CMD        # {} + is fd -X
+
+- `rg -r` is `--replace`, NOT recursive. It swallows the next token and prints
+  silently-wrong output instead of erroring. There is no `-R` at all.
+- `fd`'s positional pattern is a REGEX, not a glob - `-g` for glob, `-e` for extension.
+- Both skip `.gitignore`d and hidden files by default: `rg -uu`, `fd -HI` to see everything.
+- `-i -n -l -w -v -F -A -B -C` mean the same in `rg` as in `grep`.
+- Prefer the built-in `Grep`/`Glob` tools over shelling out at all - `Grep` *is* ripgrep.
+- If a raw `grep`/`find` is genuinely needed, append `# noguard` to the command.

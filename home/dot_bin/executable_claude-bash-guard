@@ -1,0 +1,189 @@
+#!/usr/bin/env bash
+#
+# PreToolUse(Bash) guard for Claude Code.
+#
+# Two unrelated failures land here:
+#
+#   1. Tool choice. `grep`/`find` get reached for out of habit. The deny rules
+#      in settings.json already stop those, but they answer with "denied"
+#      rather than with the rewrite.
+#   2. Flag mistranslation. `grep -rn pat .` gets carried over to `rg -rn pat .`
+#      verbatim, where -r is --replace and eats the next token. That one does
+#      not error - it prints wrongly-substituted lines and the model reasons
+#      over them.
+#
+# CLAUDE.md covers both, but it is injected once and competes with a very
+# strong prior a hundred messages later. This does not decay, and it hands
+# back the exact replacement command instead of a prohibition.
+#
+# Escape hatch: append `# noguard` to the command.
+
+set -uo pipefail
+
+input=$(cat)
+[[ "$(jq -r '.tool_name // empty' <<<"$input")" == "Bash" ]] || exit 0
+
+command_line=$(jq -r '.tool_input.command // empty' <<<"$input")
+[[ -n "$command_line" ]] || exit 0
+[[ "$command_line" == *"# noguard"* ]] && exit 0
+
+deny() {
+  jq -n --arg reason "$1" '{hookSpecificOutput: {
+    hookEventName: "PreToolUse",
+    permissionDecision: "deny",
+    permissionDecisionReason: $reason
+  }}'
+  exit 0
+}
+
+ltrim() { printf '%s' "${1#"${1%%[![:space:]]*}"}"; }
+
+# Emits NUL-separated segments, splitting on shell separators only outside
+# quotes and heredoc bodies. Without that, a commit message or a heredoc that
+# talks *about* `rg -r` reads as a line that runs it.
+split_segments() {
+  awk '
+    BEGIN {
+      sq = sprintf("%c", 39)
+      heredoc_start = "<<-?[ \t]*[\"" sq "]?[A-Za-z_][A-Za-z0-9_]*[\"" sq "]?"
+    }
+    {
+      if (terminator != "") {
+        body = $0
+        sub(/^[ \t]+/, "", body)
+        if (body == terminator) terminator = ""
+        next
+      }
+
+      line = line (started ? "\n" : "") $0
+      started = 1
+
+      rest = $0
+      while (match(rest, heredoc_start)) {
+        token = substr(rest, RSTART, RLENGTH)
+        here_string = (RSTART > 1 && substr(rest, RSTART - 1, 1) == "<")
+        rest = substr(rest, RSTART + RLENGTH)
+        if (here_string) continue
+        sub(/^<<-?[ \t]*/, "", token)
+        gsub("[\"" sq "]", "", token)
+        terminator = token
+      }
+    }
+    END {
+      for (i = 1; i <= length(line); i++) {
+        c = substr(line, i, 1)
+        if (quote == "") {
+          if (c == "\047" || c == "\"") { quote = c; segment = segment c; continue }
+          if (c == "\\") { segment = segment c substr(line, ++i, 1); continue }
+          if (index("|;&()\n", c) > 0) { printf "%s%c", segment, 0; segment = ""; continue }
+        } else if (c == "\\" && quote == "\"") {
+          segment = segment c substr(line, ++i, 1); continue
+        } else if (c == quote) {
+          quote = ""
+        }
+        segment = segment c
+      }
+      printf "%s%c", segment, 0
+    }
+  ' <<<"$1"
+}
+
+# Peels env assignments and wrappers off a segment to find the binary actually
+# being invoked, so `git grep` and `rg 'find|grep'` are left alone.
+split_invocation() {
+  local segment token
+  segment=$(ltrim "$1")
+
+  while :; do
+    token="${segment%%[[:space:]]*}"
+    [[ -n "$token" ]] || { INVOKED_BIN=""; INVOKED_ARGS=""; return; }
+
+    case "$token" in
+      sudo | time | command | nohup | env | *=*)
+        segment=$(ltrim "${segment#"$token"}")
+        ;;
+      xargs)
+        segment=$(ltrim "${segment#"$token"}")
+        while token="${segment%%[[:space:]]*}"; [[ "$token" == -* ]]; do
+          segment=$(ltrim "${segment#"$token"}")
+        done
+        ;;
+      *)
+        INVOKED_BIN="$token"
+        INVOKED_ARGS=$(ltrim "${segment#"$token"}")
+        return
+        ;;
+    esac
+  done
+}
+
+GREP_REWRITE='`grep` is not the search tool here - use `rg` (ripgrep).
+
+  grep -r pat .                  ->  rg pat            # recursive is the DEFAULT
+  grep -rn pat .                 ->  rg -n pat
+  grep -rl pat .                 ->  rg -l pat
+  grep -ri pat .                 ->  rg -i pat
+  grep -r --include="*.ts" pat   ->  rg -g "*.ts" pat  # or: rg -t ts pat
+  grep -A3 -B3 / -w / -v / -F    ->  identical in rg
+  cmd | grep pat                 ->  cmd | rg pat
+
+Do NOT carry -r across: in rg, -r is --replace and it will eat the next token.
+rg skips .gitignore'"'"'d and hidden files by default: -u ignored, -uu + hidden.'
+
+FIND_REWRITE='`find` is not the file-finder here - use `fd`.
+
+  find . -name "*.ts"            ->  fd -e ts          # or: fd -g "*.ts"
+  find . -name "foo*"            ->  fd "^foo"         # PATTERN IS REGEX, not glob
+  find . -type d                 ->  fd -t d
+  find . -type f -name X         ->  fd -t f X
+  find . -maxdepth 2             ->  fd -d 2
+  find . -exec CMD {} \;         ->  fd -x CMD
+  find . -exec CMD {} +          ->  fd -X CMD
+  find . -newer FILE             ->  fd --changed-after ...
+
+fd prints relative paths (-a for absolute) and skips .gitignore'"'"'d and hidden
+files by default: -H hidden, -I ignored, -HI both.'
+
+RG_REPLACE_REWRITE='`rg -r` does not mean recursive - that is grep'"'"'s flag.
+
+In rg, -r is --replace: it takes the NEXT token as a replacement string and
+rewrites every match with it. `rg -rn pat dir` does not error, it prints
+matches with "n" substituted in and no line numbers. Silently wrong output.
+
+rg recurses by default, so drop the flag entirely:
+
+  rg -r pat .   ->  rg pat
+  rg -rn pat .  ->  rg -n pat
+  rg -rl pat .  ->  rg -l pat
+
+If you genuinely want text substitution, spell it out: rg pat --replace=NEW
+(-R is not an rg flag at all.)'
+
+FD_GLOB_REWRITE='`fd`'"'"'s positional pattern is a REGEX, not a glob. A leading `*` is
+invalid regex and fd will fail with "regex parse error".
+
+  fd "*.ts"   ->  fd -e ts        # match by extension, preferred
+              ->  fd -g "*.ts"    # opt in to glob mode
+              ->  fd "\.ts$"      # write it as a regex'
+
+while IFS= read -r -d '' segment; do
+  split_invocation "$segment"
+
+  case "$INVOKED_BIN" in
+    grep | egrep | fgrep | rgrep) deny "$GREP_REWRITE" ;;
+    find) deny "$FIND_REWRITE" ;;
+    rg)
+      if [[ " $INVOKED_ARGS" =~ [[:space:]]-[[:alpha:]]*[rR] ]]; then
+        deny "$RG_REPLACE_REWRITE"
+      fi
+      ;;
+    fd | fdfind)
+      if [[ ! " $INVOKED_ARGS" =~ [[:space:]](-[[:alpha:]]*g|--glob) ]] &&
+        [[ " $INVOKED_ARGS" =~ [[:space:]][\'\"]?\*[.[:alnum:]] ]]; then
+        deny "$FD_GLOB_REWRITE"
+      fi
+      ;;
+  esac
+done < <(split_segments "$command_line")
+
+exit 0
