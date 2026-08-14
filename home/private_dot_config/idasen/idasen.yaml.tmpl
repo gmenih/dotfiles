@@ -1,0 +1,24 @@
+{{- /*
+  IKEA IDÅSEN desk - https://newam.github.io/idasen/index.html#configuration
+
+  The address is per-host, not per-desk: macOS never exposes BLE MACs, so
+  CoreBluetooth hands out an opaque UUID derived from this specific Mac. The
+  same desk therefore has a different address on every machine. Linux reports
+  the real MAC and would be portable.
+
+  Adding a new machine - scan for it, then add a line to the dict below:
+    uvx --with bleak python -c 'import asyncio, bleak; print(asyncio.run(bleak.BleakScanner.discover(timeout=10)))'
+  Unlisted hosts fall through to the placeholder that `idasen init` writes,
+  so the file is inert rather than broken until it is filled in.
+
+  Note: the desk's Linak controller accepts one BLE connection at a time - the
+  phone's Desk Control app will lock the CLI out while it is connected.
+*/ -}}
+{{- $deskAddress := get (dict
+      "Bishop" "F0700AEC-8D8F-2DAF-64E7-FD1066683DFC"
+    ) .chezmoi.hostname -}}
+mac_address: {{ $deskAddress | default "AA:AA:AA:AA:AA:AA" }}
+positions:
+  bottom: 0.62
+  sit: 0.75
+  stand: 1.1427
