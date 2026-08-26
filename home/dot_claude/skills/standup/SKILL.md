@@ -33,7 +33,7 @@ Neither alone is enough. Git misses the half-day spent chasing a Stripe misconfi
 ~/.claude/skills/standup/scripts/collect.sh [window]
 ```
 
-Roughly 20s and ~10k tokens of digest. It scans every git repo directly under `~/Work/Pump` and `~/Projects` (override with `STANDUP_ROOTS`), plus every `~/.claude/projects/*/**.jsonl` transcript with activity in the window.
+Roughly 7s and ~6k tokens of digest. It scans git repos up to 3 levels under **`~/Work`** (override with `STANDUP_ROOTS` / `STANDUP_REPO_DEPTH`), plus every `~/.claude/projects/*/**.jsonl` transcript with activity in the window. Personal repos under `~/Projects` are deliberately out of scope - this is for the day job.
 
 Run it **once**. Do not re-run with a wider window "just in case" - ask me first if the window looks wrong.
 
@@ -42,7 +42,12 @@ Run it **once**. Do not re-run with a wider window "just in case" - ask me first
 Three sections:
 
 - `# WINDOW` — the resolved range, and today's weekday. Sanity-check it matches what I asked for.
-- `# GIT` — per repo: commits (author-filtered to me, merges flagged `MERGE`), `uncommitted @ <path> [branch]` blocks for the main checkout **and every mn worktree**, and `PR #N [STATE]` lines for PRs I touched in the window.
+- `# GIT` — only repos with real activity in the window. Per repo: commits authored by me whose **commit date** falls inside the window (merges flagged `MERGE`), `uncommitted @ <path> [branch]` blocks for the main checkout **and every mn worktree**, and `PR #N [STATE]` lines.
+
+  Three filters keep this honest, and they are worth trusting rather than second-guessing:
+  - A repo appears only if it has in-window commits, or dirty files in a tree where a session actually ran. A repo carrying month-old scratch files is silently skipped.
+  - Commits are windowed on commit date, so a rebased-forward old branch does not masquerade as today's work.
+  - PRs listed are ones I **opened or merged** inside the window - not ones that merely collected a comment. A merged PR carries its merge date: `[MERGED 08-24]`.
 - `# CLAUDE SESSIONS` — per session: cwd, git branch, the AI-generated session title, time span, prompt count, then my prompts one-per-line (multi-line prompts folded with ` / `, pasted logs and stack traces stripped).
 
 Reading rules:

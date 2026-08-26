@@ -3,11 +3,11 @@
 # Emits plain text on stdout. Does not interpret anything - that is the agent's job.
 set -uo pipefail
 
-ROOTS_DEFAULT="$HOME/Work/Pump $HOME/Projects"
-ROOTS="${STANDUP_ROOTS:-$ROOTS_DEFAULT}"
+ROOTS="${STANDUP_ROOTS:-$HOME/Work}"
 PROJECTS_DIR="$HOME/.claude/projects"
 MAX_PROMPTS="${STANDUP_MAX_PROMPTS:-14}"
 MAX_PROMPT_CHARS="${STANDUP_MAX_PROMPT_CHARS:-220}"
+REPO_DEPTH="${STANDUP_REPO_DEPTH:-3}"
 
 usage() {
   cat >&2 <<'USAGE'
@@ -34,22 +34,19 @@ resolve_window() {
     '')
       # Monday reaches back over the weekend to Friday, every other day is -2d.
       if [ "$(date +%u)" = "1" ]; then SINCE_D=$(back 3); else SINCE_D=$(back 2); fi
-      UNTIL_D=''
-      ;;
+      UNTIL_D='' ;;
     today)      SINCE_D=$(date +%Y-%m-%d); UNTIL_D='' ;;
     yesterday)  SINCE_D=$(back 1); UNTIL_D=$(date +%Y-%m-%d) ;;
     week)       SINCE_D=$(back $(( $(date +%u) - 1 ))); UNTIL_D='' ;;
     [0-9]*d)    SINCE_D=$(back "${arg%d}"); UNTIL_D='' ;;
     [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]..[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9])
       SINCE_D="${arg%%..*}"
-      UNTIL_D=$(date -j -v+1d -f '%Y-%m-%d' "${arg##*..}" +%Y-%m-%d)
-      ;;
+      UNTIL_D=$(date -j -v+1d -f '%Y-%m-%d' "${arg##*..}" +%Y-%m-%d 2>/dev/null) || usage ;;
     [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) SINCE_D="$arg"; UNTIL_D='' ;;
     *) usage ;;
   esac
 
-  local se; se=$(day_epoch "$SINCE_D") || usage
-  [ -z "$se" ] && usage
+  local se; se=$(day_epoch "$SINCE_D"); [ -z "$se" ] && usage
   SINCE_LOCAL="$SINCE_D 00:00:00"
   SINCE_UTC=$(utc "$se")
   if [ -n "$UNTIL_D" ]; then
@@ -63,63 +60,18 @@ resolve_window() {
 
 resolve_window "${1:-}"
 
-EMAIL=$(git config --global user.email 2>/dev/null || echo '')
-[ -z "$EMAIL" ] && EMAIL=$(git -C "$PWD" config user.email 2>/dev/null || echo '')
+EMAIL=$(git config --global user.email 2>/dev/null)
+[ -z "$EMAIL" ] && EMAIL=$(git -C "$PWD" config user.email 2>/dev/null)
 
-echo "# WINDOW"
-echo "since: $SINCE_LOCAL (local)  /  $SINCE_UTC"
-echo "until: $UNTIL_LOCAL (local)  /  $UNTIL_UTC"
-echo "author: ${EMAIL:-<unset>}   today: $(date +'%Y-%m-%d %A')"
-echo
-
-echo "# GIT"
-for root in $ROOTS; do
-  [ -d "$root" ] || continue
-  for repo in "$root"/*; do
-    [ -e "$repo/.git" ] || continue
-    name="${repo#$HOME/}"
-
-    commits=$(git -C "$repo" log --all --no-merges \
-      ${EMAIL:+--author="$EMAIL"} \
-      --since="$SINCE_LOCAL" --until="$UNTIL_LOCAL" \
-      --pretty=format:'  %cd %h %d %s' --date=format:'%m-%d %H:%M' 2>/dev/null)
-    merges=$(git -C "$repo" log --all --merges \
-      ${EMAIL:+--author="$EMAIL"} \
-      --since="$SINCE_LOCAL" --until="$UNTIL_LOCAL" \
-      --pretty=format:'  %cd %h MERGE %s' --date=format:'%m-%d %H:%M' 2>/dev/null)
-    # Uncommitted work, main checkout plus every mn worktree.
-    dirty=''
-    while read -r wt; do
-      [ -z "$wt" ] && continue
-      st=$(git -C "$wt" status --porcelain 2>/dev/null | head -25)
-      [ -z "$st" ] && continue
-      br=$(git -C "$wt" rev-parse --abbrev-ref HEAD 2>/dev/null)
-      dirty+="  uncommitted @ ${wt#$HOME/} [$br]"$'\n'
-      dirty+=$(echo "$st" | sed 's/^/    /')$'\n'
-    done < <(git -C "$repo" worktree list --porcelain 2>/dev/null | rg -N '^worktree ' | sed 's/^worktree //')
-
-    [ -z "$commits$merges$dirty" ] && continue
-    echo "## $name"
-    [ -n "$commits" ] && echo "$commits"
-    [ -n "$merges" ]  && echo "$merges"
-    [ -n "$dirty" ]   && printf '%s' "$dirty"
-
-    if command -v gh >/dev/null 2>&1 && git -C "$repo" remote get-url origin 2>/dev/null | rg -qN github.com; then
-      prs=$(cd "$repo" && GH_PAGER=cat timeout 15 gh pr list --author '@me' --state all --limit 20 \
-        --json number,title,state,updatedAt,url \
-        --jq ".[] | select(.updatedAt >= \"$SINCE_UTC\") | \"  PR #\(.number) [\(.state)] \(.title)\"" 2>/dev/null)
-      [ -n "$prs" ] && echo "$prs"
-    fi
-    echo
-  done
-done
-echo
-
-echo "# CLAUDE SESSIONS"
-[ -d "$PROJECTS_DIR" ] || { echo "(no ~/.claude/projects)"; exit 0; }
-
+TMP=$(mktemp -d) && trap 'rm -rf "$TMP"' EXIT
+SESSIONS="$TMP/sessions.txt"
+SESSION_DIRS="$TMP/dirs.txt"
+: >"$SESSIONS"; : >"$SESSION_DIRS"
 US=$(printf '\037')
 
+# ---------------------------------------------------------------- sessions
+# Built first: the directories they ran in decide which dirty repos are live
+# work rather than months-old scratch.
 while read -r f; do
   [ -z "$f" ] && continue
 
@@ -135,6 +87,12 @@ while read -r f; do
 
   IFS="$US" read -r cwd branch title tfrom tto n <<<"$meta"
 
+  in_scope=''
+  for root in $ROOTS; do
+    case "$cwd" in "$root"|"$root"/*) in_scope=1; break ;; esac
+  done
+  [ -z "$in_scope" ] && continue
+
   # One line per prompt: newlines folded, pasted logs and stack frames dropped.
   prompts=$(jq -r --arg s "$SINCE_UTC" --arg u "$UNTIL_UTC" '
     select(.type=="user" and (.isMeta|not) and (.message.content|type=="string")
@@ -144,7 +102,6 @@ while read -r f; do
     | map(select(test("^\\s*$|^\\s*<|^Caveat:|^Shell cwd was reset|^\\s{2,}at |^\\[api\\]|^\\s*[0-9]{2}:[0-9]{2}:[0-9]{2}") | not))
     | join(" / ")' "$f" 2>/dev/null \
     | rg -Nv '^\s*$' | awk '!seen[$0]++')
-
   [ -z "$(printf '%s' "$prompts" | tr -d '[:space:]')" ] && continue
 
   first=$(printf '%s\n' "$prompts" | head -1)
@@ -155,12 +112,78 @@ while read -r f; do
       auto=' [automation]' ;;
   esac
 
-  echo "## ${cwd#$HOME/}${branch:+ [$branch]}$auto"
-  echo "   title: $title   |   $tfrom -> $tto UTC   |   $n prompts"
-  if [ -n "$auto" ]; then
-    printf '   - %s\n' "$(printf '%s' "$first" | cut -c1-120)"
-  else
-    printf '%s\n' "$prompts" | head -"$MAX_PROMPTS" | cut -c1-"$MAX_PROMPT_CHARS" | sed 's/^/   - /'
+  echo "$cwd" >>"$SESSION_DIRS"
+  {
+    echo "## ${cwd#$HOME/}${branch:+ [$branch]}$auto"
+    echo "   title: $title   |   $tfrom -> $tto UTC   |   $n prompts"
+    if [ -n "$auto" ]; then
+      printf '   - %s\n' "$(printf '%s' "$first" | cut -c1-120)"
+    else
+      printf '%s\n' "$prompts" | head -"$MAX_PROMPTS" | cut -c1-"$MAX_PROMPT_CHARS" | sed 's/^/   - /'
+    fi
+    echo
+  } >>"$SESSIONS"
+done < <(fd -HI -e jsonl --changed-after "$SINCE_D" . "$PROJECTS_DIR" 2>/dev/null | rg -Nv '/subagents/')
+
+worked_in() {   # true when a session in the window ran at, or under, this path
+  awk -v p="$1" 'index($0, p) == 1 && (length($0) == length(p) || substr($0, length(p)+1, 1) == "/") { found=1; exit } END { exit !found }' "$SESSION_DIRS" 2>/dev/null
+}
+
+# ------------------------------------------------------------------ output
+echo "# WINDOW"
+echo "since: $SINCE_LOCAL (local)  /  $SINCE_UTC"
+echo "until: $UNTIL_LOCAL (local)  /  $UNTIL_UTC"
+echo "author: ${EMAIL:-<unset>}   today: $(date +'%Y-%m-%d %A')   roots: $ROOTS"
+echo
+
+echo "# GIT"
+echo "(commits authored by me with a commit date inside the window)"
+echo
+while read -r gitdir; do
+  repo=$(dirname "$gitdir")
+  name="${repo#$HOME/}"
+
+  log_opts=(--all --since="$SINCE_LOCAL" --until="$UNTIL_LOCAL" --date=format:'%m-%d %H:%M')
+  [ -n "$EMAIL" ] && log_opts+=(--author="$EMAIL")
+
+  commits=$(git -C "$repo" log "${log_opts[@]}" --no-merges \
+    --pretty=format:'  %cd %h %d %s' 2>/dev/null)
+  merges=$(git -C "$repo" log "${log_opts[@]}" --merges \
+    --pretty=format:'  %cd %h MERGE %s' 2>/dev/null)
+
+  # Uncommitted work, but only where a session in this window was actually run -
+  # otherwise every repo with month-old scratch files claims a slot.
+  dirty=''
+  while read -r wt; do
+    [ -z "$wt" ] && continue
+    worked_in "$wt" || continue
+    st=$(git -C "$wt" status --porcelain 2>/dev/null | head -25)
+    [ -z "$st" ] && continue
+    br=$(git -C "$wt" rev-parse --abbrev-ref HEAD 2>/dev/null)
+    dirty+="  uncommitted @ ${wt#$HOME/} [$br]"$'\n'
+    dirty+=$(echo "$st" | sed 's/^/    /')$'\n'
+  done < <(git -C "$repo" worktree list --porcelain 2>/dev/null | rg -N '^worktree ' | sed 's/^worktree //')
+
+  [ -z "$commits$merges$dirty" ] && continue
+
+  echo "## $name"
+  [ -n "$commits" ] && echo "$commits"
+  [ -n "$merges" ]  && echo "$merges"
+  [ -n "$dirty" ]   && printf '%s' "$dirty"
+
+  # PRs I opened or merged inside the window - not every PR that got a stray comment.
+  if command -v gh >/dev/null 2>&1 && git -C "$repo" remote get-url origin 2>/dev/null | rg -qN github.com; then
+    prs=$(cd "$repo" && GH_PAGER=cat timeout 15 gh pr list --author '@me' --state all --limit 30 \
+      --json number,title,state,createdAt,mergedAt,closedAt \
+      --jq "map(select(
+              (.mergedAt  != null and .mergedAt  >= \"$SINCE_UTC\" and .mergedAt  < \"$UNTIL_UTC\") or
+              (.createdAt >= \"$SINCE_UTC\" and .createdAt < \"$UNTIL_UTC\")
+            ))[] | \"  PR #\(.number) [\(.state)\(if .mergedAt then \" \" + .mergedAt[5:10] else \"\" end)] \(.title)\"" 2>/dev/null)
+    [ -n "$prs" ] && echo "$prs"
   fi
   echo
-done < <(fd -HI -e jsonl --changed-after "$SINCE_D" . "$PROJECTS_DIR" 2>/dev/null | rg -Nv '/subagents/')
+done < <(fd -HI -t d -d "$REPO_DEPTH" '^\.git$' $ROOTS 2>/dev/null)
+echo
+
+echo "# CLAUDE SESSIONS"
+if [ -s "$SESSIONS" ]; then cat "$SESSIONS"; else echo "(none in window)"; fi
