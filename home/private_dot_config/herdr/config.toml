@@ -66,6 +66,7 @@ description = "navigate right (vim/herdr)"
 [ui]
 show_agent_labels_on_pane_borders = true
 
+agent_panel_sort = "priority"
 [ui.toast]
 delivery = "system"
 
@@ -74,5 +75,7 @@ name = "terminal"
 auto_switch = false
 
 [experimental]
+# Kitty graphics passthrough so nvim (snacks.image) can render images in panes
+kitty_graphics = true
 pane_history = false
 switch_ascii_input_source_in_prefix = false

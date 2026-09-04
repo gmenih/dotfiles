@@ -86,12 +86,16 @@ return {
       },
     },
   },
-  -- Move notify to bottom so it doesnt cover NeoTree
+  -- Move notify to bottom so it doesnt cover NeoTree; render images inline
+  -- (needs herdr experimental.kitty_graphics = true and ImageMagick installed)
   {
     "folke/snacks.nvim",
     opts = {
       notifier = {
         top_down = false,
+      },
+      image = {
+        enabled = true,
       },
     },
   },
