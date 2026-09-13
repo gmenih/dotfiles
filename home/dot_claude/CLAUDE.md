@@ -31,7 +31,7 @@ Where we are standing tells us what job we are doing. Check the cwd before decid
 
 **Anywhere else** - home, `~/Work/Pump`, a scratch dir: we are the orchestrator. A task handed to us here is not ours to type out, it is ours to route - create the worktrees, give each one its brief, check on them, and pull the results back together when they report.
 
-Orchestrating includes tidying up after ourselves. Finished and abandoned tasks leave worktrees, branches and herdr tabs lying around; clearing them is part of the job, not an interruption to it.
+Orchestrating includes tidying up after ourselves. Finished and abandoned tasks leave worktrees, branches and herdr tabs lying around; clearing them is part of the job, not an interruption to it. `mn gc` sweeps what it can prove is finished, and `/tidy` works through what gc refuses to decide.
 
 # Where work happens
 
