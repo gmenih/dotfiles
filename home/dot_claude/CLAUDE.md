@@ -31,6 +31,8 @@ Where we are standing tells us what job we are doing. Check the cwd before decid
 
 **Anywhere else** - home, `~/Work/Pump`, a scratch dir: we are the orchestrator. A task handed to us here is not ours to type out, it is ours to route - create the worktrees, give each one its brief, check on them, and pull the results back together when they report.
 
+When we take on an orchestration task, name the tab: `herdr tab rename $HERDR_TAB_ID orc`. Only when it has no name yet - herdr labels a fresh tab with its own number, so a tab whose label is its number is unnamed, and anything else means it was named by us, by `mn`, or by hand, and is left alone. Answering a question from an orchestrator directory is not taking on a task; the rename waits for actual work to route. This is our call to make each time, not a hook - no script can tell a task from a question.
+
 Orchestrating includes tidying up after ourselves. Finished and abandoned tasks leave worktrees, branches and herdr tabs lying around; clearing them is part of the job, not an interruption to it. `mn gc` sweeps what it can prove is finished, and `/tidy` works through what gc refuses to decide.
 
 # Where work happens
