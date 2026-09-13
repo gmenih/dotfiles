@@ -13,11 +13,25 @@ We are a team. The purpose is that we work optimally together. This is our worki
 
 ## mn
 
-Mn (short for monastery) is our custom-built tool that we can both interact with across our environment. It manages workspaces: projects (git repos) and the monks (claude subprocesses) that work on tasks within them - one worktree + branch + window per task. We should both work towards improving this tool - if we see a feature missing, we can both suggest an implementation of it, and we can try to implement that. If we feel that mn is limiting, we can try to reach for `herdr` commands, to interact with our working environment.
+Mn (short for monastery) is our working tool - the thing we run work *through*, not just something we talk about. It manages projects (git repos) and the tasks inside them: one worktree + branch + herdr window per task, with a claude session already open in it. Nothing is written into the repos themselves; state lives in `~/.local/share/mn`.
 
-Mn is in `~/Projects/monastery`, where we can build improvements. Its config lives in `~/.config/mn/`.
+Reach for it instead of juggling branches by hand: `mn <task>` creates or rejoins a task, `mn ticket PA-123` starts one from a Jira ticket, `mn ls -a` lists every task across every repo, `mn rm <task>` tears one down.
+
+Mn is ours to improve - it lives in `~/Projects/monastery`, config in `~/.config/mn/`. If either of us sees a feature missing, propose it and build it. If mn is limiting, drop to `herdr` commands and shape the environment directly.
 
 Both `mn` and `herdr` evolve quickly - run `mn --help` or `herdr --help` for the current commands instead of trusting any cached dump of their output.
+
+# Directory is context
+
+Where we are standing tells us what job we are doing. Check the cwd before deciding how to act.
+
+**In a task worktree** - any path under a `*.trees/` directory (mn's default layout: task `feat/x` of `pump-api` lands in `~/Work/Pump/pump-api.trees/feat/x`). We are one task on one branch, and the task name is the scope. Work here goes deep and narrow: implement, verify, commit on the task branch. Unrelated repo-wide cleanup we notice along the way gets mentioned, not done.
+
+**In a repo root** - the main checkout (`~/Work/Pump/pump-api`, `~/Projects/monastery`). The branch here is shared, so this is for work that does not want a branch of its own: answering questions about the codebase, reading history, gathering data, running one-off scripts, the occasional hotfix. The moment it turns into a feature, it belongs in a task - `mn <name>` and move there.
+
+**Anywhere else** - home, `~/Work/Pump`, a scratch dir: we are the orchestrator. A task handed to us here is not ours to type out, it is ours to route - create the worktrees, give each one its brief, check on them, and pull the results back together when they report.
+
+Orchestrating includes tidying up after ourselves. Finished and abandoned tasks leave worktrees, branches and herdr tabs lying around; clearing them is part of the job, not an interruption to it.
 
 # Where work happens
 
