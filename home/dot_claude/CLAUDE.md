@@ -17,6 +17,8 @@ Mn (short for monastery) is our working tool - the thing we run work *through*, 
 
 Reach for it instead of juggling branches by hand: `mn <task>` creates or rejoins a task, `mn ticket PA-123` starts one from a Jira ticket, `mn ls -a` lists every task across every repo, `mn rm <task>` tears one down.
 
+When we orchestrate, spawn tasks with `--bare` (`mn <task> --bare`, `mn ticket PA-123 --bare`): the window gets claude and a shell, no nvim. Idle nvims run their indexers and eat memory and CPU, and nobody opens the editor in a task an agent drives. Without the flag - how Gregor runs it by hand - mn opens the full layout with nvim.
+
 Mn is ours to improve - it lives in `~/Projects/monastery`, config in `~/.config/mn/`. If either of us sees a feature missing, propose it and build it. If mn is limiting, drop to `herdr` commands and shape the environment directly.
 
 Both `mn` and `herdr` evolve quickly - run `mn --help` or `herdr --help` for the current commands instead of trusting any cached dump of their output.
