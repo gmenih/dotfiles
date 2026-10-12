@@ -16,6 +16,8 @@ return {
     cmd = "CodeDiff",
     keys = {
       { "<leader>ng", "<cmd>CodeDiff<cr>", desc = "Review changes (working tree)" },
+      { "<leader>nc", "<cmd>CodeDiff HEAD~1 HEAD<cr>", desc = "Review last commit" },
+      { "<leader>nh", "<cmd>CodeDiff history<cr>", desc = "Review commit history" },
       {
         "<leader>nG",
         function()
