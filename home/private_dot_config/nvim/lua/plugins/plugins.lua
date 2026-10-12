@@ -15,9 +15,9 @@ return {
     "esmuellert/codediff.nvim",
     cmd = "CodeDiff",
     keys = {
-      { "<leader>gv", "<cmd>CodeDiff<cr>", desc = "Review changes (working tree)" },
+      { "<leader>ng", "<cmd>CodeDiff<cr>", desc = "Review changes (working tree)" },
       {
-        "<leader>gV",
+        "<leader>nG",
         function()
           vim.ui.input({ prompt = "Review against: " }, function(rev)
             if rev and rev ~= "" then
@@ -29,6 +29,23 @@ return {
       },
     },
     opts = {},
+  },
+
+  -- Free up <leader>n so it is a pure prefix for <leader>ng (CodeDiff) with no
+  -- timeoutlen race against LazyVim's notification history mapping.
+  {
+    "folke/snacks.nvim",
+    -- stylua: ignore
+    keys = {
+      { "<leader>n", false },
+      { "<leader>N", function()
+        if Snacks.config.picker and Snacks.config.picker.enabled then
+          Snacks.picker.notifications()
+        else
+          Snacks.notifier.show_history()
+        end
+      end, desc = "Notification History" },
+    },
   },
 
   -- Move notify to bottom so it doesnt cover NeoTree; render images inline
