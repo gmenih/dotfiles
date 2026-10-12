@@ -9,31 +9,7 @@ return {
   { "windwp/nvim-ts-autotag", enabled = false },
   { "rafamadriz/friendly-snippets", enabled = false },
 
-  -- Review AI changes as they land: VSCode style side-by-side diffs that
-  -- refresh while the agent keeps working
-  {
-    "esmuellert/codediff.nvim",
-    cmd = "CodeDiff",
-    keys = {
-      { "<leader>ng", "<cmd>CodeDiff<cr>", desc = "Review changes (working tree)" },
-      { "<leader>nc", "<cmd>CodeDiff HEAD~1 HEAD<cr>", desc = "Review last commit" },
-      { "<leader>nh", "<cmd>CodeDiff history<cr>", desc = "Review commit history" },
-      {
-        "<leader>nG",
-        function()
-          vim.ui.input({ prompt = "Review against: " }, function(rev)
-            if rev and rev ~= "" then
-              vim.cmd("CodeDiff " .. rev)
-            end
-          end)
-        end,
-        desc = "Review changes against revision",
-      },
-    },
-    opts = {},
-  },
-
-  -- Free up <leader>n so it is a pure prefix for <leader>ng (CodeDiff) with no
+  -- Free up <leader>n so it is a pure prefix for <leader>ng (Neogit) with no
   -- timeoutlen race against LazyVim's notification history mapping.
   {
     "folke/snacks.nvim",
@@ -102,6 +78,19 @@ return {
     end,
     -- <C-h/j/k/l> are mapped in lua/config/keymaps.lua so they load after
     -- LazyVim's VeryLazy window keymaps instead of being overwritten by them.
+  },
+
+  -- Neogit
+  {
+    "NeogitOrg/neogit",
+    dependencies = {
+      "nvim-lua/plenary.nvim", -- required
+      "sindrets/diffview.nvim", -- optional
+    },
+    keys = {
+      { "<leader>ng", "<cmd>Neogit<cr>", desc = "Open NeoGit" },
+    },
+    opts = {},
   },
 
   -- NeoTree on the right
