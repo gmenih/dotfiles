@@ -62,6 +62,24 @@ return {
   -- (<leader>ac comment, <leader>as send, <leader>aS send and submit)
   { "ChmaraX/herdr-nvim", opts = {} },
 
+  -- Neogit diffs as colored text instead of tinted line backgrounds; the hunk
+  -- under the cursor keeps a subtle surface tint so it stays findable
+  {
+    "catppuccin/nvim",
+    name = "catppuccin",
+    opts = {
+      custom_highlights = function(c)
+        return {
+          NeogitDiffAdd = { fg = c.green, bg = c.none },
+          NeogitDiffDelete = { fg = c.red, bg = c.none },
+          NeogitDiffAddHighlight = { fg = c.green, bg = c.surface0 },
+          NeogitDiffDeleteHighlight = { fg = c.red, bg = c.surface0 },
+          NeogitDiffContextHighlight = { bg = c.surface0 },
+        }
+      end,
+    },
+  },
+
   -- Neogit
   {
     "NeogitOrg/neogit",
@@ -73,7 +91,9 @@ return {
     keys = {
       { "<leader>ng", "<cmd>Neogit<cr>", desc = "Open NeoGit" },
     },
-    opts = {},
+    opts = {
+      commit_view = { kind = "tab" },
+    },
   },
   {
     "sindrets/diffview.nvim",
