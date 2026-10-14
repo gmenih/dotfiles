@@ -87,6 +87,7 @@ return {
       "nvim-lua/plenary.nvim", -- required
       "sindrets/diffview.nvim", -- optional
     },
+    cmd = "Neogit",
     keys = {
       { "<leader>ng", "<cmd>Neogit<cr>", desc = "Open NeoGit" },
     },

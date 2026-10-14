@@ -64,22 +64,10 @@ command = "vim-herdr-navigation.right"
 description = "navigate right (vim/herdr)"
 
 [[keys.command]]
-key = "prefix+e"
-type = "plugin_action"
-command = "chmarax.herdr-nvim.toggle"
-description = "nvim sidebar"
-
-[[keys.command]]
 key = "prefix+o"
-type = "pane"
-command = 'cd "$HERDR_ACTIVE_PANE_CWD" && nvim +Neogit'
+type = "shell"
+command = "~/.bin/herdr-neogit"
 description = "neogit in current dir"
-
-[[keys.command]]
-key = "prefix+shift+o"
-type = "plugin_action"
-command = "chmarax.herdr-nvim.pick-file"
-description = "open file from agent output"
 
 [ui]
 show_agent_labels_on_pane_borders = true
