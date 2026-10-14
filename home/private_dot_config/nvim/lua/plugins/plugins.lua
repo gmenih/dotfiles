@@ -62,18 +62,19 @@ return {
   -- (<leader>ac comment, <leader>as send, <leader>aS send and submit)
   { "ChmaraX/herdr-nvim", opts = {} },
 
-  -- Neogit diffs as colored text instead of tinted line backgrounds; the hunk
-  -- under the cursor keeps a subtle surface tint so it stays findable
+  -- Neogit diffs keep syntax colors (treesitter_diff_highlight) over faint
+  -- add/delete tints; the hunk under the cursor gets a stronger tint
   {
     "catppuccin/nvim",
     name = "catppuccin",
     opts = {
       custom_highlights = function(c)
+        local tint = require("catppuccin.utils.colors").darken
         return {
-          NeogitDiffAdd = { fg = c.green, bg = c.none },
-          NeogitDiffDelete = { fg = c.red, bg = c.none },
-          NeogitDiffAddHighlight = { fg = c.green, bg = c.surface0 },
-          NeogitDiffDeleteHighlight = { fg = c.red, bg = c.surface0 },
+          NeogitDiffAdd = { fg = c.none, bg = tint(c.green, 0.1, c.base) },
+          NeogitDiffDelete = { fg = c.none, bg = tint(c.red, 0.1, c.base) },
+          NeogitDiffAddHighlight = { fg = c.none, bg = tint(c.green, 0.2, c.base) },
+          NeogitDiffDeleteHighlight = { fg = c.none, bg = tint(c.red, 0.2, c.base) },
           NeogitDiffContextHighlight = { bg = c.surface0 },
         }
       end,
@@ -93,6 +94,7 @@ return {
     },
     opts = {
       commit_view = { kind = "tab" },
+      treesitter_diff_highlight = true,
     },
   },
   {
