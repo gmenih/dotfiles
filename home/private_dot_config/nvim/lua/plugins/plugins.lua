@@ -8,6 +8,7 @@ return {
   { "nvim-mini/mini.pairs", enabled = false },
   { "windwp/nvim-ts-autotag", enabled = false },
   { "rafamadriz/friendly-snippets", enabled = false },
+  { "mfussenegger/nvim-lint", enabled = false },
 
   -- Free up <leader>n so it is a pure prefix for <leader>ng (Neogit) with no
   -- timeoutlen race against LazyVim's notification history mapping.
@@ -57,28 +58,9 @@ return {
       end,
     },
   },
-  -- Tmux + herdr Navigator
-  -- <c-h/j/k/l> come from vim-herdr-navigation, which crosses into herdr panes
-  -- at a split edge and falls back to TmuxNavigate* when running under tmux.
-  {
-    "christoomey/vim-tmux-navigator",
-    lazy = false,
-    cmd = {
-      "TmuxNavigateLeft",
-      "TmuxNavigateDown",
-      "TmuxNavigateUp",
-      "TmuxNavigateRight",
-      "TmuxNavigatePrevious",
-    },
-    keys = {
-      { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
-    },
-    init = function()
-      vim.g.tmux_navigator_no_mappings = 1
-    end,
-    -- <C-h/j/k/l> are mapped in lua/config/keymaps.lua so they load after
-    -- LazyVim's VeryLazy window keymaps instead of being overwritten by them.
-  },
+  -- Annotate code and send the comments to the Claude pane in the same tab
+  -- (<leader>ac comment, <leader>as send, <leader>aS send and submit)
+  { "ChmaraX/herdr-nvim", opts = {} },
 
   -- Neogit
   {
@@ -92,6 +74,23 @@ return {
       { "<leader>ng", "<cmd>Neogit<cr>", desc = "Open NeoGit" },
     },
     opts = {},
+  },
+  {
+    "sindrets/diffview.nvim",
+    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory" },
+    keys = {
+      {
+        "<leader>gv",
+        function()
+          if require("diffview.lib").get_current_view() then
+            vim.cmd("DiffviewClose")
+          else
+            vim.cmd("DiffviewOpen")
+          end
+        end,
+        desc = "Toggle Diffview (working tree)",
+      },
+    },
   },
 
   -- NeoTree on the right

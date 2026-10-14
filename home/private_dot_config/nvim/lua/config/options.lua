@@ -4,8 +4,6 @@
 --
 local opt = vim.opt
 
-opt.shellcmdflag = "-ic"
-
 -- snacks.image identifies the terminal through an async XTVERSION round trip,
 -- which herdr answers on libghostty's behalf. Pin detection to TERM_PROGRAM
 -- (set by Ghostty, preserved by herdr) so it never depends on that reply.

@@ -16,18 +16,7 @@ return {
         },
         lualine_b = {},
         lualine_c = {},
-        lualine_x = {
-            -- stylua: ignore
-            {
-              function() return require("noice").api.status.mode.get() end,
-              cond = function() return package.loaded["noice"] and require("noice").api.status.mode.has() end,
-            },
-            -- stylua: ignore
-            {
-              function() return "  " .. require("dap").status() end,
-              cond = function () return package.loaded["dap"] and require("dap").status() ~= "" end,
-            },
-        },
+        lualine_x = {},
         lualine_y = {
           { "filetype" },
           { "diff" },
