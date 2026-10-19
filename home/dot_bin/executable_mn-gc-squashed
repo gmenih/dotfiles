@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Remove mn tasks whose branch landed as a squash-merged GitHub PR.
+# `mn gc` can't see squash merges (the branch never lands in its base), so
+# this asks GitHub instead. Dry run by default; pass --yes to remove.
+#
+# A task is removed only when:
+#   - its branch has a MERGED PR on GitHub
+#   - the worktree has no uncommitted changes
+#   - the local branch has no commits beyond what the PR merged
+set -euo pipefail
+
+apply=false
+[[ "${1:-}" == "--yes" || "${1:-}" == "-y" ]] && apply=true
+
+state="${XDG_DATA_HOME:-$HOME/.local/share}/mn/state.json"
+protected_branches='^(main|master|staging|develop)$'
+
+removable=()
+kept=()
+
+while IFS=$'\t' read -r repo name branch path; do
+  [[ "$branch" =~ $protected_branches ]] && continue
+  [[ -d "$path" ]] || { kept+=("$name ($(basename "$repo")): worktree missing - run mn gc"); continue; }
+
+  merged_head=$(cd "$repo" && gh pr list --head "$branch" --state merged --limit 1 \
+    --json headRefOid --jq '.[0].headRefOid // empty' 2>/dev/null) || merged_head=""
+  [[ -n "$merged_head" ]] || continue
+
+  if [[ -n "$(git -C "$path" status --porcelain)" ]]; then
+    kept+=("$name ($(basename "$repo")): merged, but has uncommitted changes")
+    continue
+  fi
+
+  local_head=$(git -C "$path" rev-parse HEAD)
+  if [[ "$local_head" != "$merged_head" ]] &&
+     ! git -C "$path" merge-base --is-ancestor "$local_head" "$merged_head" 2>/dev/null; then
+    kept+=("$name ($(basename "$repo")): merged, but has commits after the merge")
+    continue
+  fi
+
+  removable+=("$repo"$'\t'"$name")
+done < <(jq -r '.tasks[] | [.repo, .name, .branch, .path] | @tsv' "$state")
+
+echo "SQUASH-MERGED - will be removed"
+for entry in "${removable[@]}"; do
+  IFS=$'\t' read -r repo name <<<"$entry"
+  printf '  %-45s %s\n' "$name" "$(basename "$repo")"
+done
+[[ ${#removable[@]} -eq 0 ]] && echo "  (none)"
+
+if [[ ${#kept[@]} -gt 0 ]]; then
+  echo
+  echo "NEEDS A CALL - left alone"
+  printf '  %s\n' "${kept[@]}"
+fi
+
+if ! $apply; then
+  [[ ${#removable[@]} -gt 0 ]] && echo && echo "Dry run. Re-run with --yes to remove them."
+  exit 0
+fi
+
+echo
+for entry in "${removable[@]}"; do
+  IFS=$'\t' read -r repo name <<<"$entry"
+  # --force because git sees a squash-merged branch as unmerged; the checks above stand in for it.
+  (cd "$repo" && mn rm --force "$name") && echo "removed $name" || echo "FAILED $name"
+done
