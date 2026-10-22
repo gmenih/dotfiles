@@ -13,3 +13,9 @@ fpath=(~/.bin $fpath)
 # share one completion dump.
 [[ -d /opt/homebrew/share/zsh/site-functions ]] && fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
 [[ -d $HOME/.orbstack/shell/completions/zsh ]] && fpath=($HOME/.orbstack/shell/completions/zsh $fpath)
+
+# Homebrew keeps rustup keg-only (it conflicts with the `rust` formula), so its
+# bin dir is never symlinked into the prefix. The toolchain shims rustup manages
+# - cargo, rustc, clippy - install into ~/.cargo/bin instead.
+[[ -d /opt/homebrew/opt/rustup/bin ]] && path=(/opt/homebrew/opt/rustup/bin $path)
+[[ -d $HOME/.cargo/bin ]] && path=($HOME/.cargo/bin $path)
