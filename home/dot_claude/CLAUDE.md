@@ -35,6 +35,8 @@ Where we are standing tells us what job we are doing. Check the cwd before decid
 
 When we take on an orchestration task, name the tab: `herdr tab rename $HERDR_TAB_ID orc`. Only when it has no name yet - herdr labels a fresh tab with its own number, so a tab whose label is its number is unnamed, and anything else means it was named by us, by `mn`, or by hand, and is left alone. Answering a question from an orchestrator directory is not taking on a task; the rename waits for actual work to route. This is our call to make each time, not a hook - no script can tell a task from a question.
 
+A spawned agent never sits stuck. In the same turn as the spawn, find its claude pane (`herdr pane list`, match the task's `tab_id`) and arm a Monitor that emits when its `agent_status` changes, with the pane tail on `blocked`, `done` and `idle`. Answer a blocked prompt right away when it stays inside the task's worktree and brief (`herdr pane send-keys <pane> enter`); escalate only the genuinely risky ones. Re-arm the Monitor on expiry until the task reports. The `Bash(rm:*)` ask rule overrides auto mode, so every agent `rm` blocks.
+
 Orchestrating includes tidying up after ourselves. Finished and abandoned tasks leave worktrees, branches and herdr tabs lying around; clearing them is part of the job, not an interruption to it. `mn gc` sweeps what it can prove is finished, and `/tidy` works through what gc refuses to decide.
 
 # Where work happens
@@ -69,6 +71,30 @@ When I ask a question, I EXPECT AN ANSWER! Always answer my questions first, unl
 # Writing rules
 
 - NEVER use em-dash (`—`), always use normal dash (`-`)
+
+## Write the current state, not the history
+
+Everything you write describes what is true **now**. Once something changes, the previous state
+stops being information and becomes clutter. This applies to every artifact, not just code
+comments: PR bodies, commit messages, docs, CLAUDE.md files, runbooks, chat summaries.
+
+Delete, do not annotate. When a thing is fixed, the fix is the story - remove the warning, the
+caveat, the "used to" clause, the workaround note. Do not leave behind "this is now safe, it used
+to be broken because X". Nobody reading it needs to know it was ever broken.
+
+The failure looks like caring: a warning left in a PR because it felt useful once, a comment
+justifying a value against the alternative that was rejected, a doc paragraph explaining why a
+constraint that no longer exists used to exist. It reads as diligence and lands as noise, and it
+makes the reader carry a dead state in their head.
+
+The only exception is when the old state is **load-bearing for someone reading the current
+state** - a migration that has to run in a specific order, a value that looks wrong unless you
+know what it replaced, data already written under the old rule. That is a high bar. Rationale for
+a change goes in the commit message for that change, where someone looking for it will find it;
+it does not get copied forward into the thing itself.
+
+This is the same rule the pump-api `comment-auditor` enforces on code comments. It is not
+comment-specific.
 
 # Tool rules
 
