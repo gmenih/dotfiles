@@ -2,8 +2,7 @@
 
 We are a team. The purpose is that we work optimally together. This is our working environment, and we can both contribute to improving it. This is considered our IDE:
 
-- Ghostty terminal on MacOS
-- Herdr is our workspace, tabs, panes and windows manager (tmux alternative)
+- Rex terminal on MacOS - it is also our workspace manager: sessions, tabs (`window` in the CLI) and panes (`block`). The `rex` CLI drives it; `/rex` loads its guide
 - We use zsh (ohmyzsh + spaceship prompt)
 - We have a `~/.zshrc.d` directory, where we define all of our terminal aliases, helpers, etc
 - `~/.bin` has some of our scripts, and we install any binaries there that are user specific
@@ -13,15 +12,15 @@ We are a team. The purpose is that we work optimally together. This is our worki
 
 ## mn
 
-Mn (short for monastery) is our working tool - the thing we run work *through*, not just something we talk about. It manages projects (git repos) and the tasks inside them: one worktree + branch + herdr window per task, with a claude session already open in it. Nothing is written into the repos themselves; state lives in `~/.local/share/mn`.
+Mn (short for monastery) is our working tool - the thing we run work *through*, not just something we talk about. It manages projects (git repos) and the tasks inside them: one worktree + branch + Rex tab per task, with a claude session already open in it. Nothing is written into the repos themselves; state lives in `~/.local/share/mn`.
 
 Reach for it instead of juggling branches by hand: `mn <task>` creates or rejoins a task, `mn ticket PA-123` starts one from a Jira ticket, `mn ls -a` lists every task across every repo, `mn rm <task>` tears one down.
 
 When we orchestrate, spawn tasks with `--bare` (`mn <task> --bare`, `mn ticket PA-123 --bare`): the window gets claude and a shell, no nvim. Idle nvims run their indexers and eat memory and CPU, and nobody opens the editor in a task an agent drives. Without the flag - how Gregor runs it by hand - mn opens the full layout with nvim.
 
-Mn is ours to improve - it lives in `~/Projects/monastery`, config in `~/.config/mn/`. If either of us sees a feature missing, propose it and build it. If mn is limiting, drop to `herdr` commands and shape the environment directly.
+Mn is ours to improve - it lives in `~/Projects/monastery`, config in `~/.config/mn/`. If either of us sees a feature missing, propose it and build it. If mn is limiting, drop to `rex` commands and shape the environment directly.
 
-Both `mn` and `herdr` evolve quickly - run `mn --help` or `herdr --help` for the current commands instead of trusting any cached dump of their output.
+Both `mn` and `rex` evolve quickly - run `mn --help` or `rex --help` for the current commands instead of trusting any cached dump of their output.
 
 # Directory is context
 
@@ -33,11 +32,11 @@ Where we are standing tells us what job we are doing. Check the cwd before decid
 
 **Anywhere else** - home, `~/Work/Pump`, a scratch dir: we are the orchestrator. A task handed to us here is not ours to type out, it is ours to route - create the worktrees, give each one its brief, check on them, and pull the results back together when they report.
 
-When we take on an orchestration task, name the tab: `herdr tab rename $HERDR_TAB_ID orc`. Only when it has no name yet - herdr labels a fresh tab with its own number, so a tab whose label is its number is unnamed, and anything else means it was named by us, by `mn`, or by hand, and is left alone. Answering a question from an orchestrator directory is not taking on a task; the rename waits for actual work to route. This is our call to make each time, not a hook - no script can tell a task from a question.
+When we take on an orchestration task, name the tab: `rex window rename -s "$REX_SESSION" <window_id> orc`, with the id from `rex whoami --json`. Only when it has no name yet - Rex labels a fresh tab `Window <id suffix>`, so a tab with that label is unnamed, and anything else means it was named by us, by `mn`, or by hand, and is left alone. Answering a question from an orchestrator directory is not taking on a task; the rename waits for actual work to route. This is our call to make each time, not a hook - no script can tell a task from a question.
 
-A spawned agent never sits stuck. In the same turn as the spawn, find its claude pane (`herdr pane list`, match the task's `tab_id`) and arm a Monitor that emits when its `agent_status` changes, with the pane tail on `blocked`, `done` and `idle`. Answer a blocked prompt right away when it stays inside the task's worktree and brief (`herdr pane send-keys <pane> enter`); escalate only the genuinely risky ones. After sending a spawned agent a message, confirm its status flips to `working`: long text lands as an unsent paste that needs another Enter. Re-arm the Monitor on expiry until the task reports. The `Bash(rm:*)` ask rule overrides auto mode, so every agent `rm` blocks.
+A spawned agent never sits stuck. In the same turn as the spawn, find its claude pane (`rex block ls -s "$REX_SESSION" --json`, in the tab labelled with the task name) and arm a Monitor that emits when its program status changes (`rex block call -s "$REX_SESSION" -b <block> program_status`, Claude reports `working`, `blocked`, `done`, `idle`), with the pane tail (`rex capture -s "$REX_SESSION" -b <block> --trim`) on `blocked`, `done` and `idle`. Answer a blocked prompt right away when it stays inside the task's worktree and brief (`rex send-key -s "$REX_SESSION" -b <block> enter`); escalate only the genuinely risky ones. After sending a spawned agent a message, confirm its status flips to `working`: long text lands as an unsent paste that needs another Enter. Re-arm the Monitor on expiry until the task reports. The `Bash(rm:*)` ask rule overrides auto mode, so every agent `rm` blocks.
 
-Orchestrating includes tidying up after ourselves. Finished and abandoned tasks leave worktrees, branches and herdr tabs lying around; clearing them is part of the job, not an interruption to it. `mn gc` sweeps what it can prove is finished, and `/tidy` works through what gc refuses to decide.
+Orchestrating includes tidying up after ourselves. Finished and abandoned tasks leave worktrees, branches and tabs lying around; clearing them is part of the job, not an interruption to it. `mn gc` sweeps what it can prove is finished, and `/tidy` works through what gc refuses to decide.
 
 # Where work happens
 
