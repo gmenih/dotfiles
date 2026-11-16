@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-# Open Neogit in a split next to the focused herdr pane, in that pane's cwd
-set -euo pipefail
-
-pane_id=$(herdr pane split --pane "$HERDR_ACTIVE_PANE_ID" --direction right --cwd "${HERDR_ACTIVE_PANE_CWD:-$PWD}" | jq -r '.result.pane.pane_id')
-herdr pane rename "$pane_id" nvim >/dev/null
-herdr pane run "$pane_id" "nvim +Neogit" >/dev/null

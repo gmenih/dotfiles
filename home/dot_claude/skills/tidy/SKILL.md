@@ -1,6 +1,6 @@
 ---
 name: tidy
-description: Clear out finished and abandoned work - stale mn tasks with their worktrees and branches, and herdr tabs stranded by torn-down tasks. Runs `mn gc` for the provable half, then works through what gc deliberately refuses to decide. Use when orchestrating and the workspace has grown cluttered, when `mn ls` has gotten long, or when I invoke `/tidy`.
+description: Clear out finished and abandoned work - stale mn tasks with their worktrees and branches, and Rex tabs stranded by torn-down tasks. Runs `mn gc` for the provable half, then works through what gc deliberately refuses to decide. Use when orchestrating and the workspace has grown cluttered, when `mn ls` has gotten long, or when I invoke `/tidy`.
 ---
 
 # Tidy
