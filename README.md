@@ -21,7 +21,7 @@ All ZSH helpers, aliases, and config, sourced by [.zshrc](home/dot_zshrc.tmpl). 
 
 ### `.config`
 
-App configs: Ghostty, [herdr](https://herdr.sh) (workspace manager), Neovim, mn (worktree/task tool, built in [monastery](https://github.com/gmenih/monastery)), atuin, starship, yabai, skhd, Karabiner, leader-key, btop, and friends.
+App configs: Ghostty, [herdr](https://herdr.sh) (workspace manager), Neovim, mn (worktree/task tool), atuin, starship, yabai, skhd, Karabiner, leader-key, btop, and friends.
 
 ### `.claude`
 

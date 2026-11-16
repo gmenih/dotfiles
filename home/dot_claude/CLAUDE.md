@@ -12,13 +12,13 @@ We are a team. The purpose is that we work optimally together. This is our worki
 
 ## mn
 
-Mn (short for monastery) is our working tool - the thing we run work *through*, not just something we talk about. It manages projects (git repos) and the tasks inside them: one worktree + branch + tab per task, with a claude session already open in it. Nothing is written into the repos themselves; state lives in `~/.local/share/mn`.
+Mn is our working tool - the thing we run work *through*, not just something we talk about. It manages projects (git repos) and the tasks inside them: one worktree + branch + tab per task, with a claude session already open in it. Nothing is written into the repos themselves; state lives in `~/.local/share/mn`.
 
 Reach for it instead of juggling branches by hand: `mn <task>` creates or rejoins a task, `mn ticket PA-123` starts one from a Jira ticket, `mn ls -a` lists every task across every repo, `mn rm <task>` tears one down.
 
 When we orchestrate, spawn tasks with `--bare` (`mn <task> --bare`, `mn ticket PA-123 --bare`): the window gets claude and a shell, no nvim. Idle nvims run their indexers and eat memory and CPU, and nobody opens the editor in a task an agent drives. Without the flag - how Gregor runs it by hand - mn opens the full layout with nvim.
 
-Mn is ours to improve - it lives in `~/Projects/monastery`, config in `~/.config/mn/`. If either of us sees a feature missing, propose it and build it. If mn is limiting, drop to `rex` commands and shape the environment directly.
+Mn is ours to improve - its source is the mn repo in `~/Projects`, config in `~/.config/mn/`. If either of us sees a feature missing, propose it and build it. If mn is limiting, drop to `rex` commands and shape the environment directly.
 
 `mn` and `rex` both evolve quickly - run their `--help` for the current commands instead of trusting any cached dump of their output.
 
@@ -28,7 +28,7 @@ Where we are standing tells us what job we are doing. Check the cwd before decid
 
 **In a task worktree** - any path under a `*.trees/` directory (mn's default layout: task `feat/x` of `pump-api` lands in `~/Work/Pump/pump-api.trees/feat/x`). We are one task on one branch, and the task name is the scope. Work here goes deep and narrow: implement, verify, commit on the task branch. Unrelated repo-wide cleanup we notice along the way gets mentioned, not done.
 
-**In a repo root** - the main checkout (`~/Work/Pump/pump-api`, `~/Projects/monastery`). The branch here is shared, so this is for work that does not want a branch of its own: answering questions about the codebase, reading history, gathering data, running one-off scripts, the occasional hotfix. The moment it turns into a feature, it belongs in a task - `mn <name>` and move there.
+**In a repo root** - the main checkout (`~/Work/Pump/pump-api`, the mn repo). The branch here is shared, so this is for work that does not want a branch of its own: answering questions about the codebase, reading history, gathering data, running one-off scripts, the occasional hotfix. The moment it turns into a feature, it belongs in a task - `mn <name>` and move there.
 
 **Anywhere else** - home, `~/Work/Pump`, a scratch dir: we are the orchestrator. A task handed to us here is not ours to type out, it is ours to route - create the worktrees, give each one its brief, check on them, and pull the results back together when they report.
 
@@ -48,7 +48,7 @@ Orchestrating includes tidying up after ourselves. Finished and abandoned tasks 
 # Where work happens
 
 - Day job is Pump - everything lives in `~/Work/Pump`. The main project is `pump-api` (NestJS + Prisma + GraphQL); each project there has its own CLAUDE.md with the project rules.
-- Personal projects live in `~/Projects` - notably `monastery` (mn), `fintra`, and `dotfiles` (the chezmoi source).
+- Personal projects live in `~/Projects` - notably mn, `fintra`, and `dotfiles` (the chezmoi source).
 
 # Package managers
 
@@ -59,7 +59,7 @@ Projects use different package managers (npm, pnpm, yarn). NEVER assume - check 
 - Format: `type(scope): subject` - conventional commits. Types: feat, fix, docs, refactor, test, chore, build. Scope optional.
 - Subject: imperative mood, lowercase, no trailing period, max 72 chars. Never vague subjects like "updates", "changes", "wip".
 - Add a body only when the why is not obvious from the diff.
-- Claude may commit WITHOUT asking only in the dotfiles repo (`~/.local/share/chezmoi`) and in `~/Projects/monastery` (stewardship delegated 2026-07-30 - "take mn over"). In every other repo: never commit unless explicitly asked, every time. Pushing always requires a yes.
+- Claude may commit WITHOUT asking only in the dotfiles repo (`~/.local/share/chezmoi`) and in the mn repo (stewardship delegated 2026-07-30 - "take mn over"). In every other repo: never commit unless explicitly asked, every time. Pushing always requires a yes.
 - Exception: an agent running `/jira-implement` inside an mn task worktree commits on that task branch as part of the job - never on main or staging, and pushing/PRs still require a yes.
 - NEVER add a Co-Authored-By line or any other Claude attribution to commit messages.
 
