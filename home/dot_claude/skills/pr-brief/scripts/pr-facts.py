@@ -4,8 +4,9 @@
 Usage: pr-facts.py [--base <ref>] [--pr <number>] [--json]
 
 Run from inside the repo checkout of the PR branch. Without --base it diffs against the
-merge-base with origin/main (falling back to main). With --pr it also resolves the
-GitHub owner/repo so file links point at the PR's "Files changed" tab.
+merge-base with origin/main, main, origin/master or master, whichever resolves first.
+--pr selects the PR; otherwise the current branch's PR is used, when one exists, for
+GitHub file links.
 """
 
 import argparse

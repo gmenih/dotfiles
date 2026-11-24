@@ -147,7 +147,7 @@
     </ul>
   </section>
 
-  <!-- AT A GLANCE: numbers from pr-facts.py. Bars are per area, scaled to the largest area. -->
+  <!-- AT A GLANCE: numbers from pr-facts.py. One bar row per area; widths are % of the largest area's added+deleted. -->
   <section class="card">
     <h2>At a glance</h2>
     <div class="tiles">
@@ -158,7 +158,6 @@
       <div class="tile"><div class="n">{{COMMIT_COUNT}}</div><div class="l">commits</div></div>
     </div>
     <div class="bars">
-      <!-- one row per area; widths are % of the largest area's added+deleted -->
       <div class="bar-row"><span class="name">{{AREA}}</span><div class="bar"><div class="a" style="width:{{ADD_PCT}}%"></div><div class="d" style="width:{{DEL_PCT}}%"></div></div><span class="nums">{{N}} files +{{A}} -{{D}}</span></div>
     </div>
   </section>
@@ -197,7 +196,6 @@
     <div class="legend"><span class="lg-add">added</span><span class="lg-del">removed</span><span class="lg-same">unchanged</span></div>
   </section>
 
-  <!-- READING ORDER + PAY ATTENTION side by side -->
   <section class="two-col">
     <div class="card">
       <h2>Reading order</h2>

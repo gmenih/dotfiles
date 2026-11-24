@@ -54,9 +54,7 @@ State the decision and the reason in one line to the user before continuing.
 
 ## 3. Anticipate the reviewer (both paths)
 
-This step runs whether or not a brief gets built.
-
-**Cold read.** The author is the worst narrator of their own diff. Spawn a reader that is never
+**Cold read.** Spawn a reader that is never
 told the intent: use the repo's `cold-reader` agent if it exists, otherwise a general-purpose
 agent. Give it only the diff command (`git diff <base>...HEAD`) and this brief: "Read this diff
 with no context. List every choice a careful reviewer would question - surprising approaches,
