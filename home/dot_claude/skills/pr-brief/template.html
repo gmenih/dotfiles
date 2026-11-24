@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- FILL: 2-4 word name, e.g. "Email Relay Review". Never "PR #123: ..." -->
+<title>{{TITLE}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --surface-2: #f0f0ec;
+    --border: #e2e2dc;
+    --text: #1b1b18;
+    --muted: #6b6b63;
+    --accent: #3a5bd9;
+    --add: #1f7a4a;
+    --add-bg: #e3f4ea;
+    --del: #b3332b;
+    --del-bg: #fbe6e4;
+    --warn: #9a6400;
+    --warn-bg: #fdf1d8;
+    --risk-high: #b3332b;
+    --risk-med: #9a6400;
+    --risk-low: #1f7a4a;
+    --radius: 10px;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131312; --surface: #1c1c1a; --surface-2: #252522; --border: #34342f;
+      --text: #ececE6; --muted: #9c9c92; --accent: #8aa2ff;
+      --add: #6fd39b; --add-bg: #173324; --del: #ff8d84; --del-bg: #3a1d1a;
+      --warn: #f1c26b; --warn-bg: #3a2e14;
+      --risk-high: #ff8d84; --risk-med: #f1c26b; --risk-low: #6fd39b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131312; --surface: #1c1c1a; --surface-2: #252522; --border: #34342f;
+    --text: #ececE6; --muted: #9c9c92; --accent: #8aa2ff;
+    --add: #6fd39b; --add-bg: #173324; --del: #ff8d84; --del-bg: #3a1d1a;
+    --warn: #f1c26b; --warn-bg: #3a2e14;
+    --risk-high: #ff8d84; --risk-med: #f1c26b; --risk-low: #6fd39b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--text); font: 15px/1.55 var(--sans); }
+  main { max-width: 1040px; margin: 0 auto; padding: 28px 16px 80px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, .mono { font-family: var(--mono); font-size: 0.88em; }
+  code { background: var(--surface-2); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+  h1 { font-size: 26px; line-height: 1.25; margin: 6px 0 8px; }
+  h2 { font-size: 18px; margin: 0 0 12px; display: flex; align-items: baseline; gap: 8px; }
+  h2 .count { color: var(--muted); font-weight: 500; font-size: 14px; }
+  h3 { font-size: 15px; margin: 16px 0 6px; }
+  p { margin: 0 0 10px; }
+  .meta { color: var(--muted); font-size: 13px; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin-top: 18px; }
+  .tldr { font-size: 16px; }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid currentColor; }
+  .risk-high { color: var(--risk-high); } .risk-medium { color: var(--risk-med); } .risk-low { color: var(--risk-low); }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+  .tile { background: var(--surface-2); border-radius: 8px; padding: 10px 12px; }
+  .tile .n { font-size: 22px; font-weight: 700; }
+  .tile .l { color: var(--muted); font-size: 12px; }
+  .add { color: var(--add); } .del { color: var(--del); }
+  .bars { display: grid; gap: 6px; margin-top: 14px; }
+  .bar-row { display: grid; grid-template-columns: minmax(110px, 220px) 1fr auto; gap: 10px; align-items: center; font-size: 13px; }
+  .bar-row .name { font-family: var(--mono); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--surface-2); }
+  .bar .a { background: var(--add); } .bar .d { background: var(--del); }
+  .bar-row .nums { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .groups { display: grid; gap: 12px; }
+  .group { border-left: 3px solid var(--accent); padding: 2px 0 2px 14px; }
+  .group h3 { margin-top: 0; }
+  .files { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 3px; }
+  .files li { font-family: var(--mono); font-size: 12px; overflow-wrap: anywhere; }
+  .files .st { display: inline-block; width: 16px; font-weight: 700; }
+  .st-A { color: var(--add); } .st-D { color: var(--del); } .st-R { color: var(--warn); } .st-M { color: var(--muted); }
+  .diagram { background: var(--surface-2); border-radius: 8px; padding: 14px; overflow-x: auto; margin: 8px 0 6px; }
+  .diagram .mermaid { min-width: 480px; display: flex; justify-content: center; }
+  .caption { color: var(--muted); font-size: 13px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .legend span::before { content: ""; display: inline-block; width: 18px; height: 3px; margin-right: 6px; vertical-align: middle; background: currentColor; }
+  .lg-add { color: var(--add); } .lg-del { color: var(--del); } .lg-same { color: var(--muted); }
+  ol.reading { padding-left: 22px; margin: 0; } ol.reading li { margin-bottom: 6px; }
+  .hot { display: grid; gap: 10px; }
+  .hot-item { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; }
+  .hot-item .why { grid-column: 2; color: var(--text); font-size: 14px; }
+  .qa details { border-top: 1px solid var(--border); padding: 10px 0; }
+  .qa details:first-of-type { border-top: 0; }
+  .qa summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; gap: 8px; }
+  .qa summary::-webkit-details-marker { display: none; }
+  .qa summary::before { content: "+"; color: var(--muted); font-family: var(--mono); width: 12px; }
+  .qa details[open] summary::before { content: "-"; }
+  .qa .answer { padding: 8px 0 0 20px; }
+  .qa .evidence { font-size: 13px; color: var(--muted); }
+  .tag { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 4px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+  .tag.open { background: var(--warn-bg); color: var(--warn); }
+  .callout { background: var(--warn-bg); color: var(--text); border-radius: 8px; padding: 10px 14px; margin: 8px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; }
+  .table-wrap { overflow-x: auto; }
+  .checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  .checklist label { display: grid; grid-template-columns: 20px 1fr; gap: 10px; cursor: pointer; align-items: start; }
+  .checklist input { margin-top: 4px; width: 16px; height: 16px; accent-color: var(--accent); }
+  .checklist input:checked + span { color: var(--muted); text-decoration: line-through; }
+  .progress { color: var(--muted); font-size: 13px; font-weight: 500; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 720px) {
+    .two-col { grid-template-columns: 1fr; }
+    .bar-row { grid-template-columns: 1fr auto; }
+    .bar-row .bar { grid-column: 1 / -1; grid-row: 2; }
+    h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <!-- HEADER: PR link, branch, base, head sha, risk pill -->
+  <div class="meta">
+    <a href="{{PR_URL}}">#{{PR_NUMBER}}</a>
+    <span class="mono">{{HEAD_BRANCH}} &rarr; {{BASE_BRANCH}}</span>
+    <span class="mono">@ {{HEAD_SHA_SHORT}}</span>
+    <span>{{TICKET_LINK_OR_REMOVE}}</span>
+  </div>
+  <h1>{{PR_TITLE}}</h1>
+  <span class="pill risk-{{RISK_LEVEL}}">{{RISK_LEVEL}} risk</span>
+
+  <!-- TL;DR: 2-4 sentences. What changes for whom, and the one decision that shaped it. -->
+  <section class="card tldr">
+    <p>{{TLDR}}</p>
+    <p class="caption">{{RISK_REASON_ONE_LINE}}</p>
+  </section>
+
+  <!-- CHECKLIST: max 7 items, ordered by risk. Each is a concrete thing to verify, with a link. -->
+  <section class="card" id="checklist">
+    <h2>Review checklist <span class="progress" id="checklist-progress"></span></h2>
+    <ul class="checklist">
+      <li><label><input type="checkbox"><span>{{CHECK_ITEM}} <a href="{{DIFF_URL}}"><code>{{FILE}}</code></a></span></label></li>
+    </ul>
+  </section>
+
+  <!-- AT A GLANCE: numbers from pr-facts.py. Bars are per area, scaled to the largest area. -->
+  <section class="card">
+    <h2>At a glance</h2>
+    <div class="tiles">
+      <div class="tile"><div class="n">{{SOURCE_FILES}}</div><div class="l">source files</div></div>
+      <div class="tile"><div class="n"><span class="add">+{{ADDED}}</span> <span class="del">-{{DELETED}}</span></div><div class="l">lines (no generated)</div></div>
+      <div class="tile"><div class="n">{{AREA_COUNT}}</div><div class="l">areas touched</div></div>
+      <div class="tile"><div class="n">{{TEST_FILES}}</div><div class="l">test files</div></div>
+      <div class="tile"><div class="n">{{COMMIT_COUNT}}</div><div class="l">commits</div></div>
+    </div>
+    <div class="bars">
+      <!-- one row per area; widths are % of the largest area's added+deleted -->
+      <div class="bar-row"><span class="name">{{AREA}}</span><div class="bar"><div class="a" style="width:{{ADD_PCT}}%"></div><div class="d" style="width:{{DEL_PCT}}%"></div></div><span class="nums">{{N}} files +{{A}} -{{D}}</span></div>
+    </div>
+  </section>
+
+  <!-- WHAT CHANGED: grouped by intent, not by directory. Every reviewable file lands in exactly one group. -->
+  <section class="card">
+    <h2>What changed <span class="count">{{GROUP_COUNT}} parts</span></h2>
+    <div class="groups">
+      <div class="group">
+        <h3>{{GROUP_NAME}}</h3>
+        <p>{{GROUP_EXPLANATION}}</p>
+        <ul class="files">
+          <li><span class="st st-A">A</span><a href="{{DIFF_URL}}">{{PATH}}</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- BEHAVIOUR IN EXAMPLES: every rule, threshold or eligibility change, with real numbers.
+       Delete this section only when the PR changes no rule. -->
+  <section class="card">
+    <h2>Behaviour in examples</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Case</th><th>Before</th><th>After</th></tr>
+      <tr><td>{{CONCRETE_INPUT_WITH_REAL_NUMBERS}}</td><td>{{RESULT_BEFORE}}</td><td>{{RESULT_AFTER}}</td></tr>
+    </table></div>
+  </section>
+
+  <!-- DIAGRAMS: only the ones that carry information. Delete this section if none do. -->
+  <section class="card">
+    <h2>{{DIAGRAM_TITLE}}</h2>
+    <p class="caption">{{WHAT_TO_LOOK_AT_IN_THIS_DIAGRAM}}</p>
+    <div class="diagram"><pre class="mermaid">
+{{MERMAID_SOURCE}}
+    </pre></div>
+    <div class="legend"><span class="lg-add">added</span><span class="lg-del">removed</span><span class="lg-same">unchanged</span></div>
+  </section>
+
+  <!-- READING ORDER + PAY ATTENTION side by side -->
+  <section class="two-col">
+    <div class="card">
+      <h2>Reading order</h2>
+      <ol class="reading">
+        <li><a href="{{DIFF_URL}}"><code>{{FILE}}</code></a> - {{WHY_START_HERE}}</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h2>Pay attention to</h2>
+      <div class="hot">
+        <div class="hot-item"><span class="pill risk-{{LEVEL}}">{{LEVEL}}</span><a href="{{BLOB_URL_WITH_LINES}}"><code>{{FILE}}:{{LINES}}</code></a><div class="why">{{WHY}}</div></div>
+      </div>
+      <h3>Safe to skim</h3>
+      <p class="caption">{{SKIM_LIST_AND_WHY}}</p>
+    </div>
+  </section>
+
+  <!-- ANTICIPATED QUESTIONS: question as the reviewer would phrase it, answer with evidence.
+       Unanswerable ones carry the "open" tag and say so plainly. -->
+  <section class="card qa">
+    <h2>Questions a reviewer will ask <span class="count">{{Q_COUNT}}</span></h2>
+    <details>
+      <summary>{{QUESTION}} <span class="tag">{{CATEGORY}}</span></summary>
+      <div class="answer">
+        <p>{{ANSWER}}</p>
+        <p class="evidence">Evidence: <a href="{{BLOB_URL}}"><code>{{FILE}}:{{LINE}}</code></a> {{BENCHMARK_DOC_OR_TEST}}</p>
+      </div>
+    </details>
+    <details>
+      <summary>{{QUESTION}} <span class="tag open">open</span></summary>
+      <div class="answer"><p>{{WHAT_IS_NOT_KNOWN_AND_WHAT_WOULD_SETTLE_IT}}</p></div>
+    </details>
+  </section>
+
+  <!-- DATABASE: only when schema/migrations change -->
+  <section class="card">
+    <h2>Database</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Migration</th><th>Does</th><th>Locks / cost on prd</th><th>Rolling-deploy safe</th></tr>
+      <tr><td><code>{{MIGRATION}}</code></td><td>{{WHAT}}</td><td>{{LOCKS}}</td><td>{{YES_NO_WHY}}</td></tr>
+    </table></div>
+  </section>
+
+  <!-- SHIPPING: everything not finished by deploying. Delete rows that do not apply; say "Nothing by hand" if empty. -->
+  <section class="card">
+    <h2>Shipping it</h2>
+    <div class="table-wrap"><table>
+      <tr><th>When</th><th>What</th><th>Where</th></tr>
+      <tr><td>{{BEFORE_AFTER_DEPLOY}}</td><td>{{STEP}}</td><td>{{RUNBOOK_LINK_QUEUE_FLAG_CONSOLE}}</td></tr>
+    </table></div>
+    <h3>Blast radius</h3>
+    <p>{{WHO_AND_WHAT_IS_AFFECTED_AND_HOW_TO_ROLL_BACK}}</p>
+  </section>
+
+  <!-- VERIFICATION: what actually ran, with results. Gaps are listed, not hidden. -->
+  <section class="card">
+    <h2>How it was verified</h2>
+    <ul>
+      <li>{{COMMAND_OR_CHECK}} - {{RESULT}}</li>
+    </ul>
+    <h3>Not covered by tests</h3>
+    <p class="caption">{{UNTESTED_PATHS_AND_WHY}}</p>
+  </section>
+
+  <!-- SCOPE: what this PR deliberately does not do -->
+  <section class="card">
+    <h2>Not in this PR</h2>
+    <ul>
+      <li>{{OUT_OF_SCOPE_ITEM_AND_WHERE_IT_GOES}}</li>
+    </ul>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<script>
+  (function () {
+    var root = document.documentElement;
+    var forced = root.getAttribute("data-theme");
+    var dark = forced ? forced === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (window.mermaid) {
+      window.mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "neutral", securityLevel: "strict", flowchart: { curve: "basis" } });
+    }
+
+    var key = "pr-brief-checklist:" + location.pathname;
+    var boxes = Array.prototype.slice.call(document.querySelectorAll(".checklist input"));
+    var progress = document.getElementById("checklist-progress");
+    var saved = [];
+    try { saved = JSON.parse(localStorage.getItem(key) || "[]"); } catch (e) { saved = []; }
+    boxes.forEach(function (box, i) { box.checked = saved[i] === true; });
+    function update() {
+      var done = boxes.filter(function (b) { return b.checked; }).length;
+      if (progress) progress.textContent = done + " / " + boxes.length;
+      try { localStorage.setItem(key, JSON.stringify(boxes.map(function (b) { return b.checked; }))); } catch (e) {}
+    }
+    boxes.forEach(function (box) { box.addEventListener("change", update); });
+    update();
+  })();
+</script>
+</body>
+</html>
